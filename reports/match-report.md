@@ -1,21 +1,21 @@
 # Match report
 
-Generated 2026-11-22T04:03:40.068Z. Fix anything below once in `config/overrides.json`; the fix applies on every future run.
+Generated 2026-11-22T13:26:45.136Z. Fix anything below once in `config/overrides.json`; the fix applies on every future run.
 
 ## Summary
 
 - Catalog episodes: **1086**
-- Episodes with at least one link that is not known to be broken: **638**
-- Episodes whose only links are Internet Archive copies (hidden unless a listener turns that source on): **144**
-- Podcast extras: **464** (0 with broken links)
+- Episodes with at least one link that is not known to be broken: **646**
+- Episodes whose only links are Internet Archive copies (hidden unless a listener turns that source on): **139**
+- Podcast extras: **467** (0 with broken links)
 
 | Source | OK | Broken | Not yet checked |
 |---|---|---|---|
 | subsplash | 483 | 0 | 0 |
 | wayback | 178 | 0 | 1 |
 | focus-legacy | 21 | 106 | 0 |
+| omny | 31 | 0 | 0 |
 | oneplace | 7 | 0 | 0 |
-| omny | 3 | 0 | 0 |
 
 ## Newly broken today
 
@@ -129,4 +129,5 @@ Generated 2026-11-22T04:03:40.068Z. Fix anything below once in `config/overrides
 ## Matched, but worth a look
 
 - aio-215: code 215 title mismatch: "Here We Come a-Caroling" vs "Caroling, Caroling"
+- aio-461: fuzzy match "BTV: Obedience" -> "B-TV: Obedience" (0.88)
 

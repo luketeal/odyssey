@@ -23,8 +23,12 @@ export const OMNY_ORG = '6b62b447-e557-44a9-ae88-af6300da5440';
 export const OMNY_PROGRAM = '51f96c51-29f2-40a8-b3e0-af95000ecd1e';
 export const OMNY_API = `https://omny.fm/api/orgs/${OMNY_ORG}/programs/${OMNY_PROGRAM}/clips`;
 
-// "FREE EPISODE: “Value of a Buck, Part 1”", "FREE EPISODE: "500" (plus bonus interviews!)", "FREE EPISODE! "The Sounds of Life" ..."
-const FREE = /^FREE EPISODE\s*[:\-!]\s*(?:["“]([^"”]+)["”]?|(.+))/i;
+// Full episodes posted on the podcast. Titles vary over the years, e.g.
+//   FREE EPISODE: “Value of a Buck, Part 1”        FREE EPISODE! "The Sounds of Life" a Focus on the Family drama
+//   Dec. 3, 2008: FREE Adventures in Odyssey episode: "You Go to School Where?
+//   August 10, 2011: FREE HALF EPISODE: "Wooton Knows Best," plus Album 54 release!
+//   Dec. 28, 2011: FREE EPISODE: The Barclay Family Ski Vacation, plus an interview with ...
+const FREE = /\bFREE (?:HALF )?(?:Adventures in Odyssey )?EPISODE\b\s*[:\-!–]*\s*(?:Family Portraits:\s*)?(?:["“]([^"”]+)["”]?|([^,(]+))/i;
 
 /** Split podcast items into full-episode links and behind-the-scenes extras. */
 export function splitItems(entries) {
@@ -33,12 +37,12 @@ export function splitItems(entries) {
   for (const entry of entries) {
     const free = entry.title.match(FREE);
     if (free) {
-      // `extra` lets the build put it back among extras if it isn't an Odyssey episode we know.
-      links.push({ source: 'omny', url: entry.url, code: null, title: cleanTitle(free[1] ?? free[2]).replace(/,$/, ''),
-        label: 'Podcast', duration: entry.duration, date: entry.date, via: 'omny', extra: entry });
-    } else {
-      extras.push(entry);
+      // Attach it to the episode it contains. It also stays in the extras list: many of these
+      // podcast items add interviews or commentary around the episode.
+      links.push({ source: 'omny', url: entry.url, code: null, title: cleanTitle(free[1] ?? free[2]).replace(/[,.\s]+$/, ''),
+        label: /\bFREE HALF EPISODE\b/i.test(entry.title) ? 'half episode' : null, duration: entry.duration, date: entry.date, via: 'omny', extra: entry });
     }
+    extras.push(entry);
   }
   return { links, extras };
 }
