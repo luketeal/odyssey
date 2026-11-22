@@ -1,0 +1,46 @@
+name: Discover archived episodes
+
+# Manual, report-only run: searches the Internet Archive for Odyssey audio we don't link to yet
+# and commits reports/wayback-discovery.{json,md} to the branch it ran on. It never deploys.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: discover-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Search the Internet Archive
+        env:
+          SCRAPER_CONTACT: ${{ github.server_url }}/${{ github.repository }}
+        run: node scraper/discover-wayback.js
+      - name: Show summary
+        if: always()
+        run: |
+          if [ -f reports/wayback-discovery.md ]; then
+            cat reports/wayback-discovery.md >> "$GITHUB_STEP_SUMMARY"
+            head -40 reports/wayback-discovery.md
+          fi
+      - name: Commit reports
+        if: always()
+        run: |
+          [ -f reports/wayback-discovery.json ] || exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/wayback-discovery.json reports/wayback-discovery.md
+          git diff --cached --quiet && exit 0
+          git commit -m "Add Internet Archive discovery report"
+          for i in 1 2 3; do git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break; sleep 5; done
