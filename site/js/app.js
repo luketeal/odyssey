@@ -182,7 +182,7 @@ function epRow(ep, prog, { removable = false } = {}) {
     class: 'remove-btn', type: 'button', 'aria-label': `Remove ${ep.title} from this list`, title: 'Remove from list',
     onclick: () => removeProgress(ep),
   });
-  if (remove) remove.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7l-1.4-1.4L9.2 12 2.9 5.7l1.4-1.4 6.3 6.3 6.3-6.3z"/></svg>';
+  if (remove) remove.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
 
   return el('div', { class: `ep${isCurrent ? ' current' : ''}${can ? '' : ' unavailable'}${removable ? ' removable' : ''}`, 'data-id': ep.id, 'data-removable': removable || null, id: ep.isExtra || removable ? null : ep.id },
     btn,

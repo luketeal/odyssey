@@ -214,7 +214,7 @@ dialog::backdrop { background: rgb(0 0 0 / 0.45); }
   .ep { grid-template-columns: 40px 1fr; }
   .ep-side { grid-column: 2; flex-direction: row; align-items: center; }
   .ep.removable { grid-template-columns: 40px 1fr auto; }
-  .ep.removable .remove-btn { grid-column: 3; grid-row: 1; }
+  .ep.removable .remove-btn { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
   .player-inner { grid-template-columns: 1fr; grid-template-areas: "np" "seek" "controls"; }
   .controls { justify-content: center; }
 }
