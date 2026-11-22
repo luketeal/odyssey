@@ -14,10 +14,24 @@ const LOCAL_BROKEN_DAYS = 3;
 const TRACKED = new Set(['progress', 'prefs']);
 
 const memory = new Map();
+const savedJson = new Map(); // what is in the browser right now, for tracked keys
 const listeners = new Set();
 let mode = 'none';
 let dirty = false;
 let lastSaved = null;
+
+const isEmpty = (v) => v == null || (typeof v === 'object' && Object.keys(v).length === 0);
+const asJson = (v) => (isEmpty(v) ? '' : JSON.stringify(v));
+
+/** Unsaved only if the data actually differs from the saved copy (re-saving the same position is not a change). */
+function computeDirty() {
+  return [...TRACKED].some((k) => asJson(memory.get(k)) !== (savedJson.get(k) ?? ''));
+}
+
+function refreshDirty() {
+  const next = mode !== 'auto' && computeDirty();
+  if (next !== dirty) { dirty = next; notify(); }
+}
 
 function savedKeys() {
   const keys = [];
@@ -40,6 +54,7 @@ function lsSet(key, value) {
   for (const k of keys) {
     try { memory.set(k, JSON.parse(localStorage.getItem(PREFIX + k))); } catch {}
   }
+  for (const k of TRACKED) savedJson.set(k, asJson(memory.get(k)));
   lastSaved = memory.get('savedAt') ?? null;
   memory.delete('savedAt');
   if (memory.get(AUTOSAVE_KEY) === true) mode = 'auto';
@@ -57,9 +72,9 @@ function write(key, value) {
   memory.set(key, structuredClone(value));
   if (mode === 'auto') {
     lsSet(key, value);
-  } else if (TRACKED.has(key) && !dirty) {
-    dirty = true;
-    notify();
+    if (TRACKED.has(key)) savedJson.set(key, asJson(value));
+  } else if (TRACKED.has(key)) {
+    refreshDirty();
   }
   return true;
 }
@@ -69,7 +84,10 @@ function saveAll() {
   for (const [k, v] of memory) ok = lsSet(k, v) && ok;
   lastSaved = Date.now();
   lsSet('savedAt', lastSaved);
-  if (ok) dirty = false;
+  if (ok) {
+    for (const k of TRACKED) savedJson.set(k, asJson(memory.get(k)));
+    dirty = false;
+  }
   return ok;
 }
 
@@ -108,10 +126,8 @@ export const store = {
     for (const k of savedKeys()) { try { localStorage.removeItem(PREFIX + k); } catch {} }
     mode = 'none';
     lastSaved = null;
-    dirty = [...TRACKED].some((k) => {
-      const v = memory.get(k);
-      return v && (typeof v !== 'object' || Object.keys(v).length);
-    });
+    savedJson.clear();
+    dirty = computeDirty();
     notify();
   },
 

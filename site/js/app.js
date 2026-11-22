@@ -363,7 +363,10 @@ function saveNow() {
   const cur = state.current;
   if (!cur || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
   if (audio.currentTime < 2 && !store.progress(cur.item.id)) return; // don't record a bare click
-  const rec = recordPosition(store.progress(cur.item.id), cur.source.url, audio.currentTime, audio.duration);
+  const prev = store.progress(cur.item.id);
+  const rec = recordPosition(prev, cur.source.url, audio.currentTime, audio.duration);
+  // Nothing moved (e.g. the page was just hidden): don't rewrite it, or it would look like an unsaved change.
+  if (prev && prev.last === rec.last && prev.pos?.[rec.last] === rec.pos[rec.last] && Boolean(prev.done) === Boolean(rec.done)) return;
   store.setProgress(cur.item.id, rec);
   lastSave = Date.now();
   refreshRows(cur.item.id);
@@ -489,6 +492,7 @@ $('#settings-btn').addEventListener('click', () => { renderSourcePrefs(); render
 
 const saveDlg = $('#save-dlg');
 let nudged = false;
+let quiet = false; // "Not now" hides the dot (not the button) for the rest of this visit
 
 function unsavedSummary() {
   const n = Object.values(store.allProgress()).filter((p) => p.done || fraction(p) > 0).length;
@@ -499,6 +503,7 @@ function updateSaveIndicator() {
   const btn = $('#save-btn');
   const show = store.hasUnsaved();
   btn.hidden = !show;
+  btn.classList.toggle('quiet', quiet);
   btn.setAttribute('aria-label', show ? `Unsaved progress for ${unsavedSummary()}. Save it` : 'Save');
   // One gentle nudge per visit the first time there is something to lose.
   if (show && !nudged && store.mode() === 'none') {
@@ -527,6 +532,7 @@ $('#save-btn').addEventListener('click', () => {
   $('#save-msg').textContent = store.mode() === 'manual'
     ? `You have changes to ${unsavedSummary()} that aren't saved yet. Your last save will load next time unless you save again.`
     : `Nothing is saved right now, so closing this page loses your place in ${unsavedSummary()}.`;
+  saveDlg.returnValue = '';
   saveDlg.showModal();
 });
 
@@ -536,8 +542,12 @@ function doSave(auto) {
     ? (auto ? 'Saved. Autosave is on.' : 'Saved in this browser.')
     : 'This browser blocked saving (private browsing, or storage turned off).');
 }
-$('#save-auto').addEventListener('click', () => { doSave(true); saveDlg.close(); });
-$('#save-once').addEventListener('click', () => { doSave(false); saveDlg.close(); });
+saveDlg.addEventListener('close', () => {
+  // Not now, the close button or Escape: stop drawing attention for this visit.
+  if (saveDlg.returnValue !== 'saved') { quiet = true; updateSaveIndicator(); }
+});
+$('#save-auto').addEventListener('click', () => { doSave(true); saveDlg.close('saved'); });
+$('#save-once').addEventListener('click', () => { doSave(false); saveDlg.close('saved'); });
 $('#save-once-settings').addEventListener('click', () => { doSave(false); renderSaveSettings(); });
 
 $('#autosave-toggle').addEventListener('change', (e) => {

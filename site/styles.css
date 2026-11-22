@@ -70,6 +70,8 @@ h1 { font-size: 1.15rem; margin: 0; letter-spacing: -0.01em; }
 .save-btn:hover { border-color: var(--accent); }
 .save-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .save-btn .dot { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); border: 2px solid var(--surface); }
+.save-btn.quiet .dot { display: none; }
+.save-btn.quiet { color: var(--muted); background: none; }
 .save-btn.nudge { animation: nudge 0.9s ease-in-out 2; }
 @keyframes nudge { 50% { transform: scale(1.08); } }
 @media (prefers-reduced-motion: reduce) { .save-btn.nudge { animation: none; } }
