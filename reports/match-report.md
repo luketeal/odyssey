@@ -1,18 +1,18 @@
 # Match report
 
-Generated 2026-11-22T13:26:45.136Z. Fix anything below once in `config/overrides.json`; the fix applies on every future run.
+Generated 2026-11-22T15:27:39.771Z. Fix anything below once in `config/overrides.json`; the fix applies on every future run.
 
 ## Summary
 
 - Catalog episodes: **1086**
-- Episodes with at least one link that is not known to be broken: **646**
+- Episodes with at least one link that is not known to be broken: **645**
 - Episodes whose only links are Internet Archive copies (hidden unless a listener turns that source on): **139**
 - Podcast extras: **467** (0 with broken links)
 
 | Source | OK | Broken | Not yet checked |
 |---|---|---|---|
 | subsplash | 483 | 0 | 0 |
-| wayback | 178 | 0 | 1 |
+| wayback | 178 | 1 | 0 |
 | focus-legacy | 21 | 106 | 0 |
 | omny | 31 | 0 | 0 |
 | oneplace | 7 | 0 | 0 |
@@ -24,6 +24,7 @@ Generated 2026-11-22T13:26:45.136Z. Fix anything below once in `config/overrides
 - aio-104 "Lincoln, Part 1" (focus-legacy): HTTP 404 https://www.focusonthefamily.com/wp-content/uploads/2019/07/001-104-Lincoln-Part-1-of-2.mp3
 - aio-176 "The Star, Part 1" (focus-legacy): HTTP 403 https://media.focusonthefamily.com/aio/mp3/aio-the-star-pt1.mp3
 - aio-177 "The Star, Part 2" (focus-legacy): HTTP 403 https://media.focusonthefamily.com/aio/mp3/aio-the-star-pt2.mp3
+- aio-287 "Tom for Mayor, Part 2" (wayback): HTTP 404 https://web.archive.org/web/20140602193909oe_/media.focusonthefamily.com/fotf/mp3/aio/aio_20140411.mp3
 - aio-301 "The Good, the Bad, and Butch" (focus-legacy): HTTP 404 https://www.focusonthefamily.com/wp-content/uploads/2020/01/ody5_2020-02-21-The-Good-the-Bad-and-Butch.mp3
 - aio-302 "Share and Share Alike" (focus-legacy): HTTP 404 https://www.focusonthefamily.com/wp-content/uploads/2020/01/ody5_2020-02-24-Share-and-Share-Alike.mp3
 - aio-303 "All the Difference in the World" (focus-legacy): HTTP 404 https://www.focusonthefamily.com/wp-content/uploads/2020/01/ody5_2020-02-25-All-the-Difference-in-the-World.mp3
