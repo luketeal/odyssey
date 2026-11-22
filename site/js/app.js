@@ -483,29 +483,74 @@ $('#filter').addEventListener('change', (e) => {
 // ---------- settings ----------
 
 const dlg = $('#settings');
-$('#settings-btn').addEventListener('click', () => { renderSourcePrefs(); renderPersist(); dlg.showModal(); });
+$('#settings-btn').addEventListener('click', () => { renderSourcePrefs(); renderSaveSettings(); dlg.showModal(); });
 
-function renderPersist() {
-  const on = store.isPersistent();
-  $('#persist-toggle').checked = on;
-  $('#persist-desc').textContent = on
-    ? 'Your progress, last-played episode and source choices are kept in this browser only. They are never sent anywhere.'
-    : "Nothing is saved. Progress works while this page is open and is forgotten when you close it. (The browser keeps only this \"don't save\" choice.)";
+// ---------- saving (off by default) ----------
+
+const saveDlg = $('#save-dlg');
+let nudged = false;
+
+function unsavedSummary() {
+  const n = Object.values(store.allProgress()).filter((p) => p.done || fraction(p) > 0).length;
+  return n ? `${n} episode${n === 1 ? '' : 's'}` : 'your settings';
 }
 
-$('#persist-toggle').addEventListener('change', (e) => {
-  if (!e.target.checked) {
-    if (!confirm('Stop saving in this browser? Saved progress and settings will be deleted from this browser. This visit keeps working until you close the page.')) {
-      e.target.checked = true;
-      return;
-    }
-    store.setPersistent(false);
-    toast('Saved data deleted. Nothing will be saved from now on.');
-  } else {
-    store.setPersistent(true);
-    toast('Progress and settings will be saved in this browser.');
+function updateSaveIndicator() {
+  const btn = $('#save-btn');
+  const show = store.hasUnsaved();
+  btn.hidden = !show;
+  btn.setAttribute('aria-label', show ? `Unsaved progress for ${unsavedSummary()}. Save it` : 'Save');
+  // One gentle nudge per visit the first time there is something to lose.
+  if (show && !nudged && store.mode() === 'none') {
+    nudged = true;
+    btn.classList.add('nudge');
+    toast('Your progress isn\'t being saved yet. Tap Save at the top to keep it.');
   }
-  renderPersist();
+  if (dlg.open) renderSaveSettings();
+}
+store.onChange(updateSaveIndicator);
+
+function renderSaveSettings() {
+  const mode = store.mode();
+  const when = store.lastSaved() ? new Date(store.lastSaved()).toLocaleString() : null;
+  $('#autosave-toggle').checked = mode === 'auto';
+  $('#save-status').textContent =
+    mode === 'auto' ? 'Autosave is on. Your progress is saved in this browser as you listen.'
+    : mode === 'manual' ? `Saved in this browser${when ? ` on ${when}` : ''}.${store.hasUnsaved() ? ' You have newer changes that are not saved.' : ''}`
+    : 'Nothing is saved in this browser. Your progress is kept only until you close this page.';
+  $('#save-once-settings').hidden = mode === 'auto';
+  $('#delete-saved').hidden = mode === 'none';
+}
+
+$('#save-btn').addEventListener('click', () => {
+  $('#save-btn').classList.remove('nudge');
+  $('#save-msg').textContent = store.mode() === 'manual'
+    ? `You have changes to ${unsavedSummary()} that aren't saved yet. Your last save will load next time unless you save again.`
+    : `Nothing is saved right now, so closing this page loses your place in ${unsavedSummary()}.`;
+  saveDlg.showModal();
+});
+
+function doSave(auto) {
+  const ok = auto ? store.setAutosave(true) : store.saveOnce();
+  toast(ok
+    ? (auto ? 'Saved. Autosave is on.' : 'Saved in this browser.')
+    : 'This browser blocked saving (private browsing, or storage turned off).');
+}
+$('#save-auto').addEventListener('click', () => { doSave(true); saveDlg.close(); });
+$('#save-once').addEventListener('click', () => { doSave(false); saveDlg.close(); });
+$('#save-once-settings').addEventListener('click', () => { doSave(false); renderSaveSettings(); });
+
+$('#autosave-toggle').addEventListener('change', (e) => {
+  if (e.target.checked) doSave(true);
+  else { store.setAutosave(false); toast('Autosave is off. What is already saved stays until you delete it.'); }
+  renderSaveSettings();
+});
+
+$('#delete-saved').addEventListener('click', () => {
+  if (!confirm('Delete everything this player saved in this browser? Your progress from this visit stays until you close the page.')) return;
+  store.deleteSaved();
+  toast('Saved data deleted from this browser.');
+  renderSaveSettings();
 });
 dlg.addEventListener('close', () => {
   renderAll();
@@ -557,4 +602,5 @@ function toast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
 }
 
+updateSaveIndicator();
 load();
