@@ -1,8 +1,8 @@
-import { store } from './store.js';
+import { store } from './store.js?v=dev';
 import {
   reconcilePrefs, candidates, pickSource, resumePoint, recordPosition,
   fraction, formatTime, matchesQuery,
-} from './logic.js';
+} from './logic.js?v=dev';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const el = (tag, attrs = {}, ...kids) => {
