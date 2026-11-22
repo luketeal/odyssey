@@ -66,7 +66,23 @@
 
     <section id="view-extras" role="tabpanel" aria-labelledby="tab-extras" hidden>
       <p class="hint">Behind-the-scenes episodes, interviews and previews from The Official Adventures in Odyssey Podcast.</p>
-      <div id="extras-list" class="list"></div>
+      <div class="toolbar">
+        <label class="search">
+          <span class="sr-only">Search podcast extras</span>
+          <input id="search-extras" type="search" placeholder="Search by title, guest or topic" autocomplete="off">
+        </label>
+        <div class="filters" role="group" aria-label="Filter">
+          <select id="filter-extras" aria-label="Show">
+            <option value="playable">Playable</option>
+            <option value="all">All extras</option>
+            <option value="unplayed">Not started</option>
+            <option value="progress">In progress</option>
+            <option value="done">Finished</option>
+          </select>
+        </div>
+      </div>
+      <p class="stats" id="stats-extras"></p>
+      <div id="extras-list" class="seasons"></div>
     </section>
 
     <footer class="site-foot">

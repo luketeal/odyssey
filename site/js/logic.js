@@ -97,6 +97,6 @@ export function searchKey(s) {
 
 export function matchesQuery(ep, q) {
   if (!q) return true;
-  const hay = searchKey(`${ep.code ?? ''} #${ep.code ?? ''} ${ep.title} ${(ep.albums ?? []).join(' ')} ${ep.year ?? ''}`);
+  const hay = searchKey(`${ep.code ?? ''} #${ep.code ?? ''} ${ep.title} ${(ep.albums ?? []).join(' ')} ${ep.year ?? ''} ${ep.date ?? ''} ${ep.description ?? ''}`);
   return searchKey(q).split(' ').every((w) => hay.includes(w));
 }

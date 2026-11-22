@@ -28,9 +28,11 @@ const state = {
   sourceInfo: new Map(),
   prefs: null,
   view: 'episodes',
-  query: '',
-  filter: 'playable',
-  shown: PAGE,
+  extras: [], // podcast extras, oldest first
+  lists: {
+    episodes: { query: '', filter: 'playable', shown: PAGE },
+    extras: { query: '', filter: 'playable', shown: PAGE },
+  },
   current: null, // { item, source, isExtra }
 };
 
@@ -48,14 +50,19 @@ async function load() {
   const { data } = state;
   for (const ep of data.episodes) state.byId.set(ep.id, ep);
   for (const ex of data.extras ?? []) {
-    const item = { ...ex, id: `extra-${hash(ex.guid)}`, isExtra: true, sources: [{ source: 'omny', url: ex.url, label: null, status: 'ok', duration: ex.duration }] };
+    const item = { ...ex, id: `extra-${hash(ex.guid)}`, isExtra: true, sources: [{ source: 'omny', url: ex.url, label: null, status: ex.status ?? 'ok', duration: ex.duration }] };
     state.byId.set(item.id, item);
+    state.extras.push(item);
   }
+  state.extras.sort((a, b) => (a.date ?? '').localeCompare(b.date ?? ''));
   for (const s of data.sources) state.sourceInfo.set(s.id, s);
   state.prefs = reconcilePrefs(store.prefs(), data.sources);
 
   const ui = store.ui();
-  if (ui.filter) { state.filter = ui.filter; $('#filter').value = ui.filter; }
+  for (const [name, cfg] of Object.entries(LISTS)) {
+    const saved = ui[cfg.uiFilter];
+    if (saved) { state.lists[name].filter = saved; $(cfg.ids.filter).value = saved; }
+  }
   const d = new Date(data.generatedAt);
   $('#data-date').textContent = Number.isNaN(d.getTime()) ? '' : `Links last updated ${d.toLocaleDateString()}.`;
 
@@ -82,8 +89,8 @@ function renderAll() {
   renderExtras();
 }
 
-function passesFilter(ep, prog) {
-  switch (state.filter) {
+function passesFilter(ep, prog, filter) {
+  switch (filter) {
     case 'playable': return playableNow(ep);
     case 'unplayed': return !prog && playableNow(ep);
     case 'progress': return prog && !prog.done && fraction(prog) > 0;
@@ -92,58 +99,87 @@ function passesFilter(ep, prog) {
   }
 }
 
-function renderEpisodes() {
-  const progress = store.allProgress();
-  const list = $('#episode-list');
-  const eps = state.data.episodes.filter((ep) => passesFilter(ep, progress[ep.id]) && matchesQuery(ep, state.query));
-  const total = state.data.episodes.length;
-  const playable = state.data.episodes.filter(playableNow).length;
-  $('#stats').textContent = `${eps.length} shown · ${playable} of ${total} episodes playable with your source settings`;
+// The Episodes and Podcast extras tabs are the same list with different audio:
+// same search, filter, collapsible groups and rows. Only these settings differ.
+const LISTS = {
+  episodes: {
+    items: () => state.data.episodes,
+    groupKey: (ep) => String(ep.season ?? 'other'),
+    groupLabel: (key) => (key === 'other' ? 'Specials and album-only episodes' : `Season ${key}`),
+    groupMeta: (key, items) => (key === 'other' ? '' : items[0].year),
+    noun: ['episode', 'episodes'],
+    uiOpen: 'open',
+    uiFilter: 'filter',
+    ids: { list: '#episode-list', search: '#search', filter: '#filter', stats: '#stats' },
+  },
+  extras: {
+    items: () => state.extras,
+    groupKey: (x) => x.date?.slice(0, 4) ?? 'Undated',
+    groupLabel: (key) => key,
+    groupMeta: () => '',
+    noun: ['extra', 'extras'],
+    uiOpen: 'openExtras',
+    uiFilter: 'filterExtras',
+    ids: { list: '#extras-list', search: '#search-extras', filter: '#filter-extras', stats: '#stats-extras' },
+  },
+};
 
-  if (!eps.length) {
-    list.replaceChildren(el('p', { class: 'empty', text: state.filter === 'playable' && !state.query
-      ? 'No playable episodes. Check your source settings.' : 'No episodes match.' }));
+const renderEpisodes = () => renderList('episodes');
+const renderExtras = () => renderList('extras');
+
+function renderList(name) {
+  const cfg = LISTS[name];
+  const ls = state.lists[name];
+  const [one, many] = cfg.noun;
+  const progress = store.allProgress();
+  const list = $(cfg.ids.list);
+  const all = cfg.items();
+  const items = all.filter((ep) => passesFilter(ep, progress[ep.id], ls.filter) && matchesQuery(ep, ls.query));
+  const playable = all.filter(playableNow).length;
+  $(cfg.ids.stats).textContent = `${items.length} shown · ${playable} of ${all.length} ${many} playable with your source settings`;
+
+  if (!items.length) {
+    list.replaceChildren(el('p', { class: 'empty', text: ls.filter === 'playable' && !ls.query
+      ? `No playable ${many}. Check your source settings.` : `No ${many} match.` }));
     return;
   }
 
-  if (state.query) {
-    const rows = eps.slice(0, state.shown).map((ep) => epRow(ep, progress[ep.id]));
-    const body = el('div', { class: 'list' }, rows);
-    list.replaceChildren(body);
-    if (eps.length > state.shown) {
-      list.append(el('button', { class: 'btn more-btn', type: 'button', text: `Show more (${eps.length - state.shown} left)`,
-        onclick: () => { state.shown += PAGE; renderEpisodes(); } }));
+  if (ls.query) {
+    const rows = items.slice(0, ls.shown).map((ep) => epRow(ep, progress[ep.id]));
+    list.replaceChildren(el('div', { class: 'list' }, rows));
+    if (items.length > ls.shown) {
+      list.append(el('button', { class: 'btn more-btn', type: 'button', text: `Show more (${items.length - ls.shown} left)`,
+        onclick: () => { ls.shown += PAGE; renderList(name); } }));
     }
     return;
   }
 
-  // Grouped by season; bodies are built only when a season is opened.
+  // Grouped (seasons or years); bodies are built only when a group is opened.
   const groups = new Map();
-  for (const ep of eps) {
-    const key = ep.season ?? 'other';
+  for (const ep of items) {
+    const key = cfg.groupKey(ep);
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(ep);
   }
-  const openSet = new Set(store.ui().open ?? []);
+  const openSet = new Set(store.ui()[cfg.uiOpen] ?? []);
   const frag = document.createDocumentFragment();
-  for (const [key, items] of groups) {
-    const label = key === 'other' ? 'Specials and album-only episodes' : `Season ${key}`;
-    const year = key === 'other' ? '' : items[0].year;
-    const done = items.filter((e) => progress[e.id]?.done).length;
-    const det = el('details', { class: 'season', 'data-season': key },
-      el('summary', {}, el('span', { text: label }), el('span', { class: 'season-meta', text: [year, `${items.length} episodes`, done ? `${done} finished` : ''].filter(Boolean).join(' · ') })));
+  for (const [key, group] of groups) {
+    const done = group.filter((e) => progress[e.id]?.done).length;
+    const meta = [cfg.groupMeta(key, group), `${group.length} ${group.length === 1 ? one : many}`, done ? `${done} finished` : ''];
+    const det = el('details', { class: 'season', 'data-group': key },
+      el('summary', {}, el('span', { text: cfg.groupLabel(key) }), el('span', { class: 'season-meta', text: meta.filter(Boolean).join(' · ') })));
     const fill = () => {
       if (det.querySelector('.season-body')) return;
       const p = store.allProgress();
-      det.append(el('div', { class: 'season-body' }, items.map((ep) => epRow(ep, p[ep.id]))));
+      det.append(el('div', { class: 'season-body' }, group.map((ep) => epRow(ep, p[ep.id]))));
     };
     det.addEventListener('toggle', () => {
       if (det.open) fill();
-      const set = new Set(store.ui().open ?? []);
-      det.open ? set.add(String(key)) : set.delete(String(key));
-      store.setUi({ open: [...set] });
+      const set = new Set(store.ui()[cfg.uiOpen] ?? []);
+      det.open ? set.add(key) : set.delete(key);
+      store.setUi({ [cfg.uiOpen]: [...set] });
     });
-    if (openSet.has(String(key))) { det.open = true; fill(); }
+    if (openSet.has(key)) { det.open = true; fill(); }
     frag.append(det);
   }
   list.replaceChildren(frag);
@@ -163,7 +199,7 @@ function epRow(ep, prog, { removable = false } = {}) {
   else if (dur) side = el('span', { text: formatTime(dur) });
 
   const sub = [
-    ep.isExtra ? ep.date : null,
+    ep.isExtra && ep.date ? new Date(`${ep.date}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : null,
     (ep.albums ?? []).find((a) => a.startsWith('#')) ?? ep.albums?.[0],
     ep.year && !ep.albums?.length ? String(ep.year) : null,
     ep.unlisted ? 'Not in Wikipedia list' : null,
@@ -216,14 +252,6 @@ function renderContinue() {
     finished.length ? el('h3', { text: 'Recently finished' }) : null,
     ...finished.map(([id, p]) => epRow(state.byId.get(id), p, { removable: true })),
   ].filter(Boolean));
-}
-
-function renderExtras() {
-  const progress = store.allProgress();
-  const extras = [...state.byId.values()].filter((i) => i.isExtra);
-  $('#extras-list').replaceChildren(...(extras.length
-    ? extras.map((x) => epRow(x, progress[x.id]))
-    : [el('p', { class: 'empty', text: 'No podcast extras right now.' })]));
 }
 
 /** Refresh only the rows for one episode (cheap; used while playing). */
@@ -454,7 +482,7 @@ function openFromHash() {
   const ep = m && state.byId.get(decodeURIComponent(m[1]));
   if (!ep) return;
   if (ep.season != null || !ep.isExtra) {
-    const det = document.querySelector(`.season[data-season="${ep.season ?? 'other'}"]`);
+    const det = document.querySelector(`#episode-list .season[data-group="${ep.season ?? 'other'}"]`);
     if (det && !det.open) det.open = true;
     det?.dispatchEvent(new Event('toggle'));
   }
@@ -482,16 +510,22 @@ function showView(view) {
   if (view === 'episodes') renderEpisodes();
 }
 
-let searchTimer;
-$('#search').addEventListener('input', (e) => {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => { state.query = e.target.value.trim(); state.shown = PAGE; renderEpisodes(); }, 150);
-});
-$('#filter').addEventListener('change', (e) => {
-  state.filter = e.target.value;
-  store.setUi({ filter: state.filter });
-  renderEpisodes();
-});
+for (const [name, cfg] of Object.entries(LISTS)) {
+  let searchTimer;
+  $(cfg.ids.search).addEventListener('input', (e) => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      state.lists[name].query = e.target.value.trim();
+      state.lists[name].shown = PAGE;
+      renderList(name);
+    }, 150);
+  });
+  $(cfg.ids.filter).addEventListener('change', (e) => {
+    state.lists[name].filter = e.target.value;
+    store.setUi({ [cfg.uiFilter]: e.target.value });
+    renderList(name);
+  });
+}
 
 // ---------- settings ----------
 

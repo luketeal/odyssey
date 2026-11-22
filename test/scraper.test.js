@@ -5,7 +5,7 @@ import { normTitle, similarity, normCode } from '../scraper/lib/normalize.js';
 import { classify, isAudioUrl } from '../scraper/lib/classify.js';
 import { parseWikitext } from '../scraper/sources/wikipedia.js';
 import { parseHeading, parseDantan } from '../scraper/sources/dantan.js';
-import { parseOmny } from '../scraper/sources/omny.js';
+import { parseOmny, fromApiClip, splitItems } from '../scraper/sources/omny.js';
 import { matchAll } from '../scraper/match.js';
 import { nextState } from '../scraper/check.js';
 
@@ -129,4 +129,22 @@ test('nextState needs two failures before "broken"', () => {
   s = nextState(s, { ok: true, size: 100 }, today);
   assert.equal(s.status, 'ok');
   assert.equal(s.fails, 0);
+});
+
+test('Omny listing clips keep the RSS guid and split free episodes', () => {
+  const imported = fromApiClip({ Id: 'abc', ImportedId: 'https://old/feed/item.mp3', Title: 'Remembering Earl Boen',
+    AudioUrl: 'https://traffic.omny.fm/x.mp3', PublishedUtc: '2023-03-08T09:00:00Z', DurationSeconds: 1234.6, Description: '<p>Hi</p>' });
+  assert.equal(imported.guid, 'https://old/feed/item.mp3');
+  assert.equal(imported.date, '2023-03-08');
+  assert.equal(imported.duration, 1235);
+  assert.equal(fromApiClip({ Id: 'xyz', Title: 'New', AudioUrl: 'u' }).guid, 'xyz');
+
+  const { links, extras } = splitItems([
+    { title: 'FREE EPISODE! "The Sounds of Life" a Focus on the Family drama', url: 'a' },
+    { title: 'FREE EPISODE: "House Guest," a drama from 1985.', url: 'b' },
+    { title: 'Meet the cast', url: 'c' },
+  ]);
+  assert.deepEqual(links.map((l) => l.title), ['The Sounds of Life', 'House Guest']);
+  assert.ok(links[0].extra, 'free episodes carry their extra entry in case they match no episode');
+  assert.equal(extras.length, 1);
 });
