@@ -149,7 +149,7 @@ function renderEpisodes() {
   list.replaceChildren(frag);
 }
 
-function epRow(ep, prog) {
+function epRow(ep, prog, { removable = false } = {}) {
   const can = playableNow(ep);
   const isCurrent = state.current?.item.id === ep.id;
   const onlyArchive = ep.sources?.length && ep.sources.every((s) => s.source === 'wayback');
@@ -178,13 +178,20 @@ function epRow(ep, prog) {
   });
   btn.innerHTML = PLAY_ICON;
 
-  return el('div', { class: `ep${isCurrent ? ' current' : ''}${can ? '' : ' unavailable'}`, 'data-id': ep.id, id: ep.isExtra ? null : ep.id },
+  const remove = removable && el('button', {
+    class: 'remove-btn', type: 'button', 'aria-label': `Remove ${ep.title} from this list`, title: 'Remove from list',
+    onclick: () => removeProgress(ep),
+  });
+  if (remove) remove.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+
+  return el('div', { class: `ep${isCurrent ? ' current' : ''}${can ? '' : ' unavailable'}${removable ? ' removable' : ''}`, 'data-id': ep.id, 'data-removable': removable || null, id: ep.isExtra || removable ? null : ep.id },
     btn,
     el('div', { class: 'ep-main' },
       el('div', { class: 'ep-title' }, ep.code ? el('span', { class: 'ep-num', text: `#${ep.code}` }) : null, ep.title),
       sub.length ? el('div', { class: 'ep-sub' }, sub.map((s) => el('span', { text: s }))) : null,
       ep.isExtra && ep.description ? el('div', { class: 'extra-desc', text: ep.description }) : null),
     el('div', { class: 'ep-side' }, side, onlyArchive && can ? el('span', { class: 'badge archive', text: 'Archive' }) : null),
+    remove || null,
     f > 0 && f < 1 ? el('div', { class: 'progress', 'aria-hidden': 'true' }, el('i', { style: `width:${(f * 100).toFixed(1)}%` })) : null,
   );
 }
@@ -205,9 +212,9 @@ function renderContinue() {
   }
   list.replaceChildren(...[
     inProgress.length ? el('h3', { text: 'In progress' }) : null,
-    ...inProgress.map(([id, p]) => epRow(state.byId.get(id), p)),
+    ...inProgress.map(([id, p]) => epRow(state.byId.get(id), p, { removable: true })),
     finished.length ? el('h3', { text: 'Recently finished' }) : null,
-    ...finished.map(([id, p]) => epRow(state.byId.get(id), p)),
+    ...finished.map(([id, p]) => epRow(state.byId.get(id), p, { removable: true })),
   ].filter(Boolean));
 }
 
@@ -223,7 +230,8 @@ function renderExtras() {
 function refreshRows(id) {
   const ep = state.byId.get(id);
   const prog = store.progress(id);
-  document.querySelectorAll(`[data-id="${CSS.escape(id)}"]`).forEach((row) => row.replaceWith(epRow(ep, prog)));
+  document.querySelectorAll(`[data-id="${CSS.escape(id)}"]`).forEach((row) =>
+    row.replaceWith(epRow(ep, prog, { removable: row.hasAttribute('data-removable') })));
 }
 
 // ---------- player ----------
@@ -324,6 +332,7 @@ audio.addEventListener('loadedmetadata', () => {
 });
 
 audio.addEventListener('canplay', () => { clearTimeout(loadTimer); player.classList.remove('loading'); });
+audio.addEventListener('play', () => { if (state.current) removed.delete(state.current.item.id); });
 audio.addEventListener('play', () => { player.classList.add('playing'); $('#play').setAttribute('aria-label', 'Pause'); });
 audio.addEventListener('pause', () => { player.classList.remove('playing'); $('#play').setAttribute('aria-label', 'Play'); saveNow(); });
 audio.addEventListener('timeupdate', () => {
@@ -362,6 +371,7 @@ function handleLoadFailure() {
 function saveNow() {
   const cur = state.current;
   if (!cur || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
+  if (removed.has(cur.item.id)) return; // cleared by the listener; comes back only if they press play again
   if (audio.currentTime < 2 && !store.progress(cur.item.id)) return; // don't record a bare click
   const prev = store.progress(cur.item.id);
   const rec = recordPosition(prev, cur.source.url, audio.currentTime, audio.duration);
@@ -620,12 +630,40 @@ $('#clear-history').addEventListener('click', () => {
 // ---------- toast ----------
 
 let toastTimer;
-function toast(msg) {
+function toast(msg, action) {
   const t = $('#toast');
-  t.textContent = msg;
+  t.replaceChildren(el('span', { text: msg }));
+  if (action) {
+    t.append(el('button', { type: 'button', class: 'toast-action', text: action.label, onclick: () => {
+      t.classList.remove('show');
+      action.run();
+    } }));
+  }
+  t.classList.toggle('has-action', Boolean(action));
   t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+  toastTimer = setTimeout(() => t.classList.remove('show'), action ? 6000 : 3500);
+}
+
+// ---------- removing items from Continue ----------
+
+const removed = new Set();
+
+function removeProgress(ep) {
+  const before = store.progress(ep.id);
+  store.clearProgress(ep.id);
+  removed.add(ep.id);
+  renderContinue();
+  refreshRows(ep.id);
+  toast(`Removed "${ep.title}".`, {
+    label: 'Undo',
+    run: () => {
+      if (before) store.setProgress(ep.id, before);
+      removed.delete(ep.id);
+      renderContinue();
+      refreshRows(ep.id);
+    },
+  });
 }
 
 updateSaveIndicator();
