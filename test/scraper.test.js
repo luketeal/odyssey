@@ -95,7 +95,7 @@ test('parseOmny separates free episodes from extras', () => {
   const r = parseOmny(xml);
   assert.equal(r.links[0].title, 'Value of a Buck, Part 1');
   assert.equal(r.links[0].duration, 1643);
-  assert.equal(r.extras.length, 1);
+  assert.equal(r.extras.length, 2, 'free episodes also stay in extras');
 });
 
 test('matchAll: code, title, split episodes, overrides', () => {
@@ -146,7 +146,10 @@ test('Omny listing clips keep the RSS guid and split free episodes', () => {
   ]);
   assert.deepEqual(links.map((l) => l.title), ['The Sounds of Life', 'House Guest']);
   assert.ok(links[0].extra, 'free episodes carry their extra entry in case they match no episode');
-  assert.equal(extras.length, 1);
+  assert.equal(extras.length, 3, 'everything stays in extras');
+  const older = splitItems([{ title: 'Dec. 3, 2008: FREE Adventures in Odyssey episode: "You Go to School Where?', url: 'd' },
+    { title: 'FREE AUDIOBOOK: "Showdown with the Shepherd', url: 'e' }]);
+  assert.deepEqual(older.links.map((l) => l.title), ['You Go to School Where?']);
 });
 
 test('ID3 reader and discovery guessers', async () => {

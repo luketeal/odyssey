@@ -112,6 +112,8 @@ export function guessFromId3(tags) {
   // Subsplash and OnePlace files all carry the same generic title, which says nothing.
   if (/^adventures in odyssey( daily| podcast)?$/i.test(tags.title.trim())) return null;
   const t = cleanTitle(tags.title).replace(/^Adventures in Odyssey\s*[-:#]*\s*/i, '');
+  // Date-style titles ("01-19-23 ...", "Adventures in Odyssey 5/9/2014") are broadcasts, not episode numbers.
+  if (/^\d{1,2}[-/]\d{1,2}([-/]\d{2,4})?\b/.test(t) || /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(t)) return null;
   const h = parseHeading(t.replace(/^#\s*/, ''));
   if (h.code) return { code: h.code, title: h.title };
   const track = tags.track && /^\d{1,4}$/.test(tags.track.split('/')[0]) && Number(tags.track.split('/')[0]) > 30 ? normCode(tags.track.split('/')[0]) : null;
