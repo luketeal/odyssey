@@ -51,7 +51,7 @@ body {
 }
 a { color: var(--accent); }
 button, input, select { font: inherit; color: inherit; }
-.wrap { max-width: 900px; margin: 0 auto; padding: 0 16px; }
+.wrap { max-width: 900px; margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* Header */
@@ -144,7 +144,9 @@ h1 { font-size: 1.15rem; margin: 0; letter-spacing: -0.01em; }
 .player {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
   background: var(--surface); border-top: 1px solid var(--line); box-shadow: var(--shadow);
-  padding-bottom: env(safe-area-inset-bottom);
+  /* Keep the same small gap above whatever is below the player: Safari's address bar, or the
+     home bar when saved as a web app (iOS reports that area only with viewport-fit=cover). */
+  padding-bottom: env(safe-area-inset-bottom, 0px); /* side insets are handled by .wrap */
 }
 .player-inner { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "np controls" "seek seek"; gap: 6px 12px; padding-top: 10px; padding-bottom: 10px; align-items: center; }
 .np { grid-area: np; min-width: 0; }
@@ -216,5 +218,7 @@ dialog::backdrop { background: rgb(0 0 0 / 0.45); }
   .ep.removable { grid-template-columns: 40px 1fr auto; }
   .ep.removable .remove-btn { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
   .player-inner { grid-template-columns: 1fr; grid-template-areas: "np" "seek" "controls"; }
-  .controls { justify-content: center; }
+  /* Back · play · forward centred on the screen; speed pinned to the right edge. */
+  .controls { justify-content: center; position: relative; }
+  .ctl.rate { position: absolute; right: 0; top: 50%; transform: translateY(-50%); }
 }
