@@ -62,16 +62,16 @@ button, input, select { font: inherit; color: inherit; }
 h1 { font-size: 1.15rem; margin: 0; letter-spacing: -0.01em; }
 .sub { margin: 0; font-size: 0.8rem; color: var(--muted); }
 .top-actions { display: flex; align-items: center; gap: 4px; }
-.save-btn {
-  display: inline-flex; align-items: center; gap: 6px; position: relative; cursor: pointer;
-  border: 1px solid var(--line); background: var(--surface-2); color: var(--text);
-  border-radius: 999px; padding: 6px 12px 6px 10px; font-size: 0.85rem; font-weight: 600;
-}
-.save-btn:hover { border-color: var(--accent); }
-.save-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-.save-btn .dot { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); border: 2px solid var(--surface); }
-.save-btn.quiet .dot { display: none; }
-.save-btn.quiet { color: var(--muted); background: none; }
+/* The hidden attribute must win over any display rule (the Save button once stayed visible because of this). */
+[hidden] { display: none !important; }
+.save-btn { position: relative; }
+.save-btn .i-auto, .save-btn.auto .i-save { display: none; }
+.save-btn.auto .i-auto { display: block; }
+.save-btn.unsaved { color: var(--text); }
+.save-btn.auto { color: var(--accent); }
+.save-btn .dot { position: absolute; top: 5px; right: 5px; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); border: 2px solid var(--surface); display: none; }
+.save-btn.unsaved:not(.quiet) .dot { display: block; }
+.save-btn.quiet { color: var(--muted); }
 .save-btn.nudge { animation: nudge 0.9s ease-in-out 2; }
 @keyframes nudge { 50% { transform: scale(1.08); } }
 @media (prefers-reduced-motion: reduce) { .save-btn.nudge { animation: none; } }
