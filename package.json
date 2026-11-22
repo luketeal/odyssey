@@ -1,0 +1,25 @@
+{
+  "name": "aio-episode-player",
+  "version": "1.0.0",
+  "description": "Unofficial fan player that collects publicly posted Adventures in Odyssey episode links.",
+  "scripts": {
+    "scrape": "node scraper/index.js",
+    "scrape:quick": "node scraper/index.js --no-check",
+    "check-all": "node scraper/index.js --check-wayback",
+    "test": "node --test test/*.test.js",
+    "serve": "npx --yes serve@14.2.4 site"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luketeal/odyssey.git"
+  },
+  "bugs": {
+    "url": "https://github.com/luketeal/odyssey/issues"
+  },
+  "homepage": "https://github.com/luketeal/odyssey#readme",
+  "dependencies": {
+    "cheerio": "^1.0.0"
+  },
+  "private": true,
+  "type": "module"
+}

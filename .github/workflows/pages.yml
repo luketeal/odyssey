@@ -1,0 +1,77 @@
+name: Update episodes and deploy
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Nightly link refresh. Sundays also re-check Internet Archive links (slow).
+    - cron: '23 7 * * *'
+  workflow_dispatch:
+    inputs:
+      check_wayback:
+        description: 'Also re-check Internet Archive links'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Collect, match and check links
+        env:
+          # Identifies the scraper to the sites it reads (Wikimedia asks for contact info).
+          SCRAPER_CONTACT: ${{ github.server_url }}/${{ github.repository }}
+        run: |
+          if [ "$(date -u +%u)" = "7" ] || [ "${{ inputs.check_wayback }}" = "true" ]; then
+            node scraper/index.js --check-wayback
+          else
+            node scraper/index.js
+          fi
+      - name: Commit updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/data/episodes.json reports/match-report.md
+          if git diff --cached --quiet; then
+            echo "No data changes."
+          else
+            git commit -m "Update episode data"
+            git push
+          fi
+
+  deploy:
+    needs: scrape
+    # Runs after a scrape, or on its own for a push to main (when scrape is skipped).
+    if: always() && needs.scrape.result != 'failure' && needs.scrape.result != 'cancelled'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

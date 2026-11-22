@@ -1,0 +1,58 @@
+{
+  "$comment": "scrape=false stops collecting from a source (its links are removed on the next run). defaultEnabled controls whether the player uses it before a listener changes their settings. Order here is the default playback priority.",
+  "sources": [
+    {
+      "id": "subsplash",
+      "name": "Focus on the Family (Subsplash)",
+      "description": "Episode uploads hosted on Focus on the Family's Subsplash media account.",
+      "official": true,
+      "scrape": true,
+      "defaultEnabled": true,
+      "check": "daily"
+    },
+    {
+      "id": "omny",
+      "name": "Official Podcast",
+      "description": "Free episodes from The Official Adventures in Odyssey Podcast.",
+      "official": true,
+      "scrape": true,
+      "defaultEnabled": true,
+      "check": "daily"
+    },
+    {
+      "id": "oneplace",
+      "name": "OnePlace broadcast",
+      "description": "Recent daily radio broadcasts from OnePlace.com. These links expire after a while.",
+      "official": true,
+      "scrape": true,
+      "defaultEnabled": true,
+      "check": "daily",
+      "ephemeral": true
+    },
+    {
+      "id": "focus-legacy",
+      "name": "Focus on the Family (older uploads)",
+      "description": "Older files from Focus on the Family's own websites. Many have been taken down.",
+      "official": true,
+      "scrape": true,
+      "defaultEnabled": true,
+      "check": "daily"
+    },
+    {
+      "id": "wayback",
+      "name": "Internet Archive (Wayback Machine)",
+      "description": "Archived copies of files Focus on the Family no longer hosts. Off by default.",
+      "official": false,
+      "scrape": true,
+      "defaultEnabled": false,
+      "check": "weekly"
+    }
+  ],
+  "excludedHosts": [
+    "amazonaws.com",
+    "cloudfront.net",
+    "facebook.com",
+    "youtube.com",
+    "youtu.be"
+  ]
+}
