@@ -69,6 +69,7 @@ async function load() {
   renderAll();
   restoreLast();
   openFromHash();
+  restoreAfterUpdate();
 }
 
 function hash(s) {
@@ -362,7 +363,7 @@ audio.addEventListener('loadedmetadata', () => {
 audio.addEventListener('canplay', () => { clearTimeout(loadTimer); player.classList.remove('loading'); });
 audio.addEventListener('play', () => { if (state.current) removed.delete(state.current.item.id); });
 audio.addEventListener('play', () => { player.classList.add('playing'); $('#play').setAttribute('aria-label', 'Pause'); });
-audio.addEventListener('pause', () => { player.classList.remove('playing'); $('#play').setAttribute('aria-label', 'Play'); saveNow(); });
+audio.addEventListener('pause', () => { player.classList.remove('playing'); $('#play').setAttribute('aria-label', 'Play'); saveNow(); maybeReload(); });
 audio.addEventListener('timeupdate', () => {
   updateTimes();
   if (Date.now() - lastSave > 5000 && !audio.paused) saveNow();
@@ -606,6 +607,7 @@ function doSave(auto) {
     ? (auto ? 'Saved. Autosave is on.' : 'Saved in this browser.')
     : 'This browser blocked saving (private browsing, or storage turned off).');
 }
+saveDlg.addEventListener('close', () => setTimeout(maybeReload, 0));
 saveDlg.addEventListener('close', () => {
   // Not now, the close button or Escape: stop drawing attention for this visit.
   if (saveDlg.returnValue !== 'saved') { quiet = true; updateSaveIndicator(); }
@@ -626,6 +628,7 @@ $('#delete-saved').addEventListener('click', () => {
   toast('Saved data deleted from this browser.');
   renderSaveSettings();
 });
+dlg.addEventListener('close', () => setTimeout(maybeReload, 0));
 dlg.addEventListener('close', () => {
   renderAll();
   if (state.current) renderSourceSelect();
@@ -703,6 +706,82 @@ function removeProgress(ep) {
     },
   });
 }
+
+// ---------- staying up to date ----------
+// A Home Screen web app on iPhone is resumed rather than reloaded, so it can stay on an old
+// version indefinitely. Each deploy writes version.json; when the app comes back to the
+// foreground (and every 15 minutes) it compares that with its own version and, if newer,
+// reloads itself at a moment that won't interrupt anything.
+
+const APP_VERSION = new URL(import.meta.url).searchParams.get('v') || 'dev';
+let newVersion = null;
+let lastCheck = 0;
+let offeredReload = false;
+const skipVersion = new URL(location.href).searchParams.get('updated'); // a reload already tried this one
+
+async function checkForUpdate() {
+  if (APP_VERSION === 'dev' || document.hidden || Date.now() - lastCheck < 60_000) return;
+  lastCheck = Date.now();
+  try {
+    const res = await fetch(`version.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) return;
+    const { version } = await res.json();
+    if (version && version !== APP_VERSION && version !== skipVersion) {
+      newVersion = version;
+      maybeReload();
+    }
+  } catch { /* offline: try again later */ }
+}
+
+function busy() {
+  if (state.current && !audio.paused) return 'playing';
+  if (dlg.open || saveDlg.open) return 'dialog';
+  if (document.activeElement?.matches('input, select, textarea')) return 'typing';
+  return null;
+}
+
+function maybeReload() {
+  if (!newVersion || busy()) return;
+  if (store.hasUnsaved()) {
+    // Reloading would lose progress that only lives in memory: offer instead, once.
+    if (!offeredReload) {
+      offeredReload = true;
+      toast('A new version is available. Reloading now would lose unsaved progress.', { label: 'Reload', run: reloadForUpdate });
+    }
+    return;
+  }
+  reloadForUpdate();
+}
+
+function reloadForUpdate() {
+  saveNow();
+  const u = new URL(location.href);
+  u.searchParams.set('updated', newVersion); // also makes the address new, so the phone can't serve a cached old page
+  u.searchParams.set('view', state.view);
+  u.searchParams.set('y', String(Math.round(scrollY)));
+  if (state.current) u.searchParams.set('item', state.current.item.id);
+  location.replace(u.href);
+}
+
+/** After an update reload: put the listener back where they were, then tidy the address. */
+function restoreAfterUpdate() {
+  const u = new URL(location.href);
+  if (!u.searchParams.has('updated')) return;
+  const view = u.searchParams.get('view');
+  const y = Number(u.searchParams.get('y')) || 0;
+  const item = state.byId.get(u.searchParams.get('item'));
+  for (const k of ['updated', 'view', 'y', 'item']) u.searchParams.delete(k);
+  history.replaceState(null, '', u.pathname + u.search + u.hash);
+  if (item && state.current?.item.id !== item.id && playableNow(item)) playItem(item, { autoplay: false });
+  if (view && view !== state.view && ['episodes', 'continue', 'extras'].includes(view)) showView(view);
+  requestAnimationFrame(() => scrollTo(0, y));
+}
+
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkForUpdate(); });
+window.addEventListener('pageshow', () => checkForUpdate());
+window.addEventListener('focusout', () => setTimeout(maybeReload, 0));
+audio.addEventListener('ended', maybeReload);
+setInterval(checkForUpdate, 15 * 60_000);
 
 updateSaveIndicator();
 load();

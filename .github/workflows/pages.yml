@@ -76,6 +76,8 @@ jobs:
           v="$(git rev-parse --short=8 HEAD)"
           sed -i "s/?v=dev/?v=$v/g" site/index.html site/js/app.js
           grep -q "?v=$v" site/index.html
+          # The app compares this with its own version to know when to reload itself.
+          printf '{"version":"%s"}\n' "$v" > site/version.json
       - uses: actions/configure-pages@v5
       # One bundle name per attempt: re-running a failed deploy would otherwise find several
       # "github-pages" bundles in the same run and refuse to deploy.
