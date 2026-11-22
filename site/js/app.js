@@ -50,7 +50,7 @@ async function load() {
   const { data } = state;
   for (const ep of data.episodes) state.byId.set(ep.id, ep);
   for (const ex of data.extras ?? []) {
-    const item = { ...ex, id: `extra-${hash(ex.guid)}`, isExtra: true, sources: [{ source: 'omny', url: ex.url, label: null, status: 'ok', duration: ex.duration }] };
+    const item = { ...ex, id: `extra-${hash(ex.guid)}`, isExtra: true, sources: [{ source: 'omny', url: ex.url, label: null, status: ex.status ?? 'ok', duration: ex.duration }] };
     state.byId.set(item.id, item);
     state.extras.push(item);
   }

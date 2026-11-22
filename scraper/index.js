@@ -62,7 +62,8 @@ async function main() {
 
   // 2. Audio links. One failing source never empties the catalog: its previous links are reused.
   const links = [];
-  let extras = prev?.extras ?? [];
+  const prevExtras = prev?.extras ?? [];
+  let foundExtras = null; // null = podcast source failed this run
   const unknownHosts = [];
   async function run(name, ids, fn) {
     if (!ids.some(enabled)) return;
@@ -84,8 +85,8 @@ async function main() {
   await run('Official podcast', ['omny'], async () => {
     const r = await omny.collect();
     links.push(...r.links);
-    extras = r.extras;
-    console.log(`  ${r.links.length} free episodes, ${r.extras.length} extras`);
+    foundExtras = r.extras;
+    console.log(`  ${r.links.length} free episodes, ${r.extras.length} extras (from ${r.via})`);
   });
   await run('OnePlace', ['oneplace'], async () => {
     const r = await oneplace.collect();
@@ -102,10 +103,27 @@ async function main() {
 
   // 3. Match
   const { episodes, report } = matchAll(catalog, kept, overrides);
+
+  // A "FREE EPISODE" that isn't an Odyssey episode we know (e.g. another Focus on the Family drama)
+  // belongs with the extras rather than in the unmatched report.
+  const freeNonEpisodes = report.unmatched.filter((u) => u.extra);
+  report.unmatched = report.unmatched.filter((u) => !u.extra);
+
+  // Extras: keep every one ever found, even after it drops out of Omny's listing or feed.
+  const extrasByGuid = new Map(prevExtras.map((x) => [x.guid, x]));
+  for (const x of [...(foundExtras ?? []), ...freeNonEpisodes.map((u) => u.extra)]) {
+    const before = extrasByGuid.get(x.guid);
+    extrasByGuid.set(x.guid, { ...x, status: before?.status, fails: before?.fails, since: before?.since, size: before?.size });
+  }
+  const extrasList = [...extrasByGuid.values()].sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''));
+  const retained = foundExtras ? extrasList.length - foundExtras.length - freeNonEpisodes.length : 0;
+  if (retained > 0) console.log(`  kept ${retained} extras no longer listed by the podcast`);
   console.log(`Matched ${report.matched} links; ${report.unmatched.length} unmatched, ${report.flagged.length} flagged.`);
 
   // 4. Check
-  const allLinks = episodes.flatMap((e) => e.links);
+  // Extras are checked like any other Omny link.
+  for (const x of extrasList) if (x.status && !prevState.has(x.url)) prevState.set(x.url, { status: x.status, fails: x.fails ?? 0, since: x.since, size: x.size ?? null });
+  const allLinks = [...episodes.flatMap((e) => e.links), ...extrasList.map((x) => ({ url: x.url, source: 'omny' }))];
   const unique = [...new Map(allLinks.map((l) => [l.url, l])).values()];
   let state;
   if (args.has('--no-check')) {
@@ -140,7 +158,10 @@ async function main() {
       const { links: _l, ...rest } = ep;
       return { ...rest, sources };
     }),
-    extras,
+    extras: extrasList.map((x) => {
+      const st = state.get(x.url) ?? { status: 'unchecked', fails: 0, since: today };
+      return { ...x, status: st.status, fails: st.fails, since: st.since, size: st.size ?? null };
+    }),
   };
 
   // Report (written before the underscore fields are stripped)
@@ -180,7 +201,7 @@ function buildReport(out, report, problems, unknownHosts) {
     `- Catalog episodes: **${eps.length}**`,
     `- Episodes with at least one link that is not known to be broken: **${playable.length}**`,
     `- Episodes whose only links are Internet Archive copies (hidden unless a listener turns that source on): **${onlyArchive.length}**`,
-    `- Podcast extras: **${out.extras.length}**`,
+    `- Podcast extras: **${out.extras.length}** (${out.extras.filter((x) => x.status === 'broken').length} with broken links)`,
     '',
     '| Source | OK | Broken | Not yet checked |',
     '|---|---|---|---|',
