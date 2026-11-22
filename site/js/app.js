@@ -1,0 +1,530 @@
+import { store } from './store.js';
+import {
+  reconcilePrefs, candidates, pickSource, resumePoint, recordPosition,
+  fraction, formatTime, matchesQuery,
+} from './logic.js';
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v == null || v === false) continue;
+    if (k === 'class') n.className = v;
+    else if (k === 'text') n.textContent = v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v === true ? '' : v);
+  }
+  for (const kid of kids.flat()) if (kid != null && kid !== false) n.append(kid);
+  return n;
+};
+
+const PLAY_ICON = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>';
+const PAGE = 100;
+const RATES = [1, 1.25, 1.5, 1.75, 2, 0.75];
+
+const state = {
+  data: null,
+  byId: new Map(),
+  sourceInfo: new Map(),
+  prefs: null,
+  view: 'episodes',
+  query: '',
+  filter: 'playable',
+  shown: PAGE,
+  current: null, // { item, source, isExtra }
+};
+
+// ---------- data ----------
+
+async function load() {
+  try {
+    const res = await fetch('data/episodes.json', { cache: 'no-cache' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    state.data = await res.json();
+  } catch (err) {
+    $('#episode-list').replaceChildren(el('p', { class: 'empty', text: `Couldn't load the episode list (${err.message}). Try reloading.` }));
+    return;
+  }
+  const { data } = state;
+  for (const ep of data.episodes) state.byId.set(ep.id, ep);
+  for (const ex of data.extras ?? []) {
+    const item = { ...ex, id: `extra-${hash(ex.guid)}`, isExtra: true, sources: [{ source: 'omny', url: ex.url, label: null, status: 'ok', duration: ex.duration }] };
+    state.byId.set(item.id, item);
+  }
+  for (const s of data.sources) state.sourceInfo.set(s.id, s);
+  state.prefs = reconcilePrefs(store.prefs(), data.sources);
+
+  const ui = store.ui();
+  if (ui.filter) { state.filter = ui.filter; $('#filter').value = ui.filter; }
+  const d = new Date(data.generatedAt);
+  $('#data-date').textContent = Number.isNaN(d.getTime()) ? '' : `Links last updated ${d.toLocaleDateString()}.`;
+
+  renderAll();
+  restoreLast();
+  openFromHash();
+}
+
+function hash(s) {
+  let h = 0;
+  for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) | 0;
+  return (h >>> 0).toString(36);
+}
+
+const localBroken = () => store.localBroken();
+const playableNow = (ep) => candidates(ep, state.prefs, localBroken()).length > 0;
+const sourceName = (id) => state.sourceInfo.get(id)?.name ?? id;
+
+// ---------- rendering ----------
+
+function renderAll() {
+  renderEpisodes();
+  renderContinue();
+  renderExtras();
+}
+
+function passesFilter(ep, prog) {
+  switch (state.filter) {
+    case 'playable': return playableNow(ep);
+    case 'unplayed': return !prog && playableNow(ep);
+    case 'progress': return prog && !prog.done && fraction(prog) > 0;
+    case 'done': return prog?.done;
+    default: return true;
+  }
+}
+
+function renderEpisodes() {
+  const progress = store.allProgress();
+  const list = $('#episode-list');
+  const eps = state.data.episodes.filter((ep) => passesFilter(ep, progress[ep.id]) && matchesQuery(ep, state.query));
+  const total = state.data.episodes.length;
+  const playable = state.data.episodes.filter(playableNow).length;
+  $('#stats').textContent = `${eps.length} shown · ${playable} of ${total} episodes playable with your source settings`;
+
+  if (!eps.length) {
+    list.replaceChildren(el('p', { class: 'empty', text: state.filter === 'playable' && !state.query
+      ? 'No playable episodes. Check your source settings.' : 'No episodes match.' }));
+    return;
+  }
+
+  if (state.query) {
+    const rows = eps.slice(0, state.shown).map((ep) => epRow(ep, progress[ep.id]));
+    const body = el('div', { class: 'list' }, rows);
+    list.replaceChildren(body);
+    if (eps.length > state.shown) {
+      list.append(el('button', { class: 'btn more-btn', type: 'button', text: `Show more (${eps.length - state.shown} left)`,
+        onclick: () => { state.shown += PAGE; renderEpisodes(); } }));
+    }
+    return;
+  }
+
+  // Grouped by season; bodies are built only when a season is opened.
+  const groups = new Map();
+  for (const ep of eps) {
+    const key = ep.season ?? 'other';
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(ep);
+  }
+  const openSet = new Set(store.ui().open ?? []);
+  const frag = document.createDocumentFragment();
+  for (const [key, items] of groups) {
+    const label = key === 'other' ? 'Specials and album-only episodes' : `Season ${key}`;
+    const year = key === 'other' ? '' : items[0].year;
+    const done = items.filter((e) => progress[e.id]?.done).length;
+    const det = el('details', { class: 'season', 'data-season': key },
+      el('summary', {}, el('span', { text: label }), el('span', { class: 'season-meta', text: [year, `${items.length} episodes`, done ? `${done} finished` : ''].filter(Boolean).join(' · ') })));
+    const fill = () => {
+      if (det.querySelector('.season-body')) return;
+      const p = store.allProgress();
+      det.append(el('div', { class: 'season-body' }, items.map((ep) => epRow(ep, p[ep.id]))));
+    };
+    det.addEventListener('toggle', () => {
+      if (det.open) fill();
+      const set = new Set(store.ui().open ?? []);
+      det.open ? set.add(String(key)) : set.delete(String(key));
+      store.setUi({ open: [...set] });
+    });
+    if (openSet.has(String(key))) { det.open = true; fill(); }
+    frag.append(det);
+  }
+  list.replaceChildren(frag);
+}
+
+function epRow(ep, prog) {
+  const can = playableNow(ep);
+  const isCurrent = state.current?.item.id === ep.id;
+  const onlyArchive = ep.sources?.length && ep.sources.every((s) => s.source === 'wayback');
+  const best = candidates(ep, state.prefs, localBroken())[0];
+  const dur = prog?.dur?.[prog.last] ?? best?.duration;
+  const f = fraction(prog);
+
+  let side;
+  if (prog?.done) side = el('span', { class: 'badge done', text: 'Finished' });
+  else if (f > 0 && dur) side = el('span', { text: `${formatTime(dur - (prog.pos[prog.last] ?? 0))} left` });
+  else if (dur) side = el('span', { text: formatTime(dur) });
+
+  const sub = [
+    ep.isExtra ? ep.date : null,
+    (ep.albums ?? []).find((a) => a.startsWith('#')) ?? ep.albums?.[0],
+    ep.year && !ep.albums?.length ? String(ep.year) : null,
+    ep.unlisted ? 'Not in Wikipedia list' : null,
+    !can && ep.sources?.length ? (onlyArchive ? 'Archive copy only, turn on in Settings' : 'No working link right now') : null,
+    !ep.sources?.length ? 'No known link' : null,
+  ].filter(Boolean);
+
+  const btn = el('button', {
+    class: 'play-btn', type: 'button', disabled: !can,
+    'aria-label': `Play ${ep.title}`,
+    onclick: () => playItem(ep, { autoplay: true }),
+  });
+  btn.innerHTML = PLAY_ICON;
+
+  return el('div', { class: `ep${isCurrent ? ' current' : ''}${can ? '' : ' unavailable'}`, 'data-id': ep.id, id: ep.isExtra ? null : ep.id },
+    btn,
+    el('div', { class: 'ep-main' },
+      el('div', { class: 'ep-title' }, ep.code ? el('span', { class: 'ep-num', text: `#${ep.code}` }) : null, ep.title),
+      sub.length ? el('div', { class: 'ep-sub' }, sub.map((s) => el('span', { text: s }))) : null,
+      ep.isExtra && ep.description ? el('div', { class: 'extra-desc', text: ep.description }) : null),
+    el('div', { class: 'ep-side' }, side, onlyArchive && can ? el('span', { class: 'badge archive', text: 'Archive' }) : null),
+    f > 0 && f < 1 ? el('div', { class: 'progress', 'aria-hidden': 'true' }, el('i', { style: `width:${(f * 100).toFixed(1)}%` })) : null,
+  );
+}
+
+function renderContinue() {
+  const progress = store.allProgress();
+  const entries = Object.entries(progress)
+    .filter(([id]) => state.byId.has(id))
+    .sort((a, b) => (b[1].updated ?? 0) - (a[1].updated ?? 0));
+  const inProgress = entries.filter(([, p]) => !p.done && fraction(p) > 0);
+  const finished = entries.filter(([, p]) => p.done).slice(0, 20);
+  $('#continue-count').textContent = inProgress.length || '';
+
+  const list = $('#continue-list');
+  if (!entries.length) {
+    list.replaceChildren(el('p', { class: 'empty', text: 'Episodes you start will appear here so you can pick up where you left off.' }));
+    return;
+  }
+  list.replaceChildren(...[
+    inProgress.length ? el('h3', { text: 'In progress' }) : null,
+    ...inProgress.map(([id, p]) => epRow(state.byId.get(id), p)),
+    finished.length ? el('h3', { text: 'Recently finished' }) : null,
+    ...finished.map(([id, p]) => epRow(state.byId.get(id), p)),
+  ].filter(Boolean));
+}
+
+function renderExtras() {
+  const progress = store.allProgress();
+  const extras = [...state.byId.values()].filter((i) => i.isExtra);
+  $('#extras-list').replaceChildren(...(extras.length
+    ? extras.map((x) => epRow(x, progress[x.id]))
+    : [el('p', { class: 'empty', text: 'No podcast extras right now.' })]));
+}
+
+/** Refresh only the rows for one episode (cheap; used while playing). */
+function refreshRows(id) {
+  const ep = state.byId.get(id);
+  const prog = store.progress(id);
+  document.querySelectorAll(`[data-id="${CSS.escape(id)}"]`).forEach((row) => row.replaceWith(epRow(ep, prog)));
+}
+
+// ---------- player ----------
+
+const audio = $('#audio');
+const player = $('#player');
+let lastSave = 0;
+let pendingResume = null;
+let triedThisLoad = new Set();
+let loadTimer;
+
+function setPlayerHeight() {
+  document.documentElement.style.setProperty('--player-h', player.hidden ? '0px' : `${player.offsetHeight}px`);
+}
+
+function playItem(item, { source, autoplay = true, silentFallback = false } = {}) {
+  const prev = state.current;
+  if (prev && prev.item.id !== item.id) saveNow();
+  const prog = store.progress(item.id);
+  const src = source ?? pickSource(item, state.prefs, prog, localBroken());
+  if (!src) {
+    toast('No working link for this episode with your current source settings.');
+    return;
+  }
+  if (!prev || prev.item.id !== item.id) triedThisLoad = new Set();
+  triedThisLoad.add(src.url);
+
+  state.current = { item, source: src };
+  state.wantPlay = autoplay;
+  pendingResume = { autoplay, fromSource: prev?.item.id === item.id ? prev.source : null, silentFallback };
+  audio.src = src.url;
+  audio.playbackRate = state.prefs.rate ?? 1;
+  audio.load();
+  $('#seek').value = 0;
+  $('#seek').max = 0;
+  $('#cur').textContent = '0:00';
+  $('#dur').textContent = src.duration ? formatTime(src.duration) : '0:00';
+  // Some hosts never answer at all; treat 20s of silence like a failed link.
+  clearTimeout(loadTimer);
+  const loadingUrl = src.url;
+  loadTimer = setTimeout(() => {
+    if (state.current?.source.url === loadingUrl && audio.readyState === 0) handleLoadFailure();
+  }, 20000);
+
+  player.hidden = false;
+  player.classList.add('loading');
+  $('#np-title').textContent = item.code ? `#${item.code} ${item.title}` : item.title;
+  renderSourceSelect();
+  $('#rate').textContent = `${audio.playbackRate}×`;
+  setPlayerHeight();
+  store.setUi({ lastId: item.id });
+  if (!item.isExtra) history.replaceState(null, '', `#ep=${encodeURIComponent(item.id)}`);
+  document.querySelectorAll('.ep.current').forEach((r) => r.classList.remove('current'));
+  document.querySelectorAll(`[data-id="${CSS.escape(item.id)}"]`).forEach((r) => r.classList.add('current'));
+  setupMediaSession(item);
+}
+
+function renderSourceSelect() {
+  const { item, source } = state.current;
+  const broken = localBroken();
+  const sel = $('#np-source');
+  const sources = [...(item.sources ?? [])].sort((a, b) => state.prefs.order.indexOf(a.source) - state.prefs.order.indexOf(b.source));
+  sel.replaceChildren(...sources.map((s) => {
+    const notes = [];
+    if (!state.prefs.enabled[s.source]) notes.push('off in settings');
+    if (s.status === 'broken' || broken[s.url]) notes.push('not working');
+    const text = `From: ${sourceName(s.source)}${s.label ? ` (${s.label})` : ''}${notes.length ? ` [${notes.join(', ')}]` : ''}`;
+    return el('option', { value: s.url, selected: s.url === source.url, text });
+  }));
+  sel.disabled = sources.length < 2;
+}
+
+$('#np-source').addEventListener('change', (e) => {
+  const { item } = state.current;
+  const s = item.sources.find((x) => x.url === e.target.value);
+  if (!s) return;
+  saveNow();
+  playItem(item, { source: s, autoplay: !audio.paused || audio.currentTime === 0 });
+});
+
+audio.addEventListener('loadedmetadata', () => {
+  const cur = state.current;
+  if (!cur || !pendingResume) return;
+  const prog = store.progress(cur.item.id);
+  const { time, approximate } = resumePoint(prog, cur.source.url, audio.duration);
+  if (time > 0 && time < audio.duration - 5) {
+    audio.currentTime = time;
+    if (approximate) toast(`This copy is a different length, so it resumed at about ${formatTime(time)}.`);
+    else if (!pendingResume.silentFallback) toast(`Resuming at ${formatTime(time)}`);
+  }
+  if (pendingResume.autoplay) audio.play().catch(() => {});
+  pendingResume = null;
+  updateTimes();
+});
+
+audio.addEventListener('canplay', () => { clearTimeout(loadTimer); player.classList.remove('loading'); });
+audio.addEventListener('play', () => { player.classList.add('playing'); $('#play').setAttribute('aria-label', 'Pause'); });
+audio.addEventListener('pause', () => { player.classList.remove('playing'); $('#play').setAttribute('aria-label', 'Play'); saveNow(); });
+audio.addEventListener('timeupdate', () => {
+  updateTimes();
+  if (Date.now() - lastSave > 5000 && !audio.paused) saveNow();
+});
+audio.addEventListener('ended', () => {
+  saveNow();
+  toast('Finished. Nice listening!');
+});
+
+audio.addEventListener('error', () => {
+  if (!state.current || !audio.getAttribute('src')) return;
+  // Only remember the failure for network/format errors, not when the user aborted.
+  if (audio.error?.code === MediaError.MEDIA_ERR_ABORTED) return;
+  handleLoadFailure();
+});
+
+function handleLoadFailure() {
+  const cur = state.current;
+  clearTimeout(loadTimer);
+  store.markBroken(cur.source.url);
+  const next = candidates(cur.item, state.prefs, localBroken()).find((s) => !triedThisLoad.has(s.url));
+  const wasAuto = Boolean(state.wantPlay || pendingResume?.autoplay || !audio.paused);
+  if (next) {
+    toast(`That link didn't load. Switched to ${sourceName(next.source)}.`);
+    playItem(cur.item, { source: next, autoplay: wasAuto, silentFallback: true });
+  } else {
+    player.classList.remove('loading');
+    toast('None of the links for this episode are working right now. Try turning on more sources in Settings.');
+    renderSourceSelect();
+  }
+  refreshRows(cur.item.id);
+}
+
+function saveNow() {
+  const cur = state.current;
+  if (!cur || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
+  if (audio.currentTime < 2 && !store.progress(cur.item.id)) return; // don't record a bare click
+  const rec = recordPosition(store.progress(cur.item.id), cur.source.url, audio.currentTime, audio.duration);
+  store.setProgress(cur.item.id, rec);
+  lastSave = Date.now();
+  refreshRows(cur.item.id);
+  if (state.view === 'continue') renderContinue();
+  else $('#continue-count').textContent = Object.values(store.allProgress()).filter((p) => !p.done && fraction(p) > 0).length || '';
+}
+
+function updateTimes() {
+  const d = Number.isFinite(audio.duration) ? audio.duration : 0;
+  const seek = $('#seek');
+  seek.max = Math.floor(d);
+  if (!seek.matches(':active')) seek.value = Math.floor(audio.currentTime);
+  $('#cur').textContent = formatTime(audio.currentTime);
+  $('#dur').textContent = formatTime(d);
+  if ('mediaSession' in navigator && d && navigator.mediaSession.setPositionState) {
+    try { navigator.mediaSession.setPositionState({ duration: d, position: Math.min(audio.currentTime, d), playbackRate: audio.playbackRate }); } catch {}
+  }
+}
+
+const skip = (s) => { audio.currentTime = Math.max(0, Math.min((audio.duration || 0) - 1, audio.currentTime + s)); };
+const toggle = () => {
+  if (!state.current) return;
+  state.wantPlay = audio.paused;
+  audio.paused ? audio.play().catch(() => {}) : audio.pause();
+};
+
+$('#play').addEventListener('click', toggle);
+$('#back').addEventListener('click', () => skip(-15));
+$('#fwd').addEventListener('click', () => skip(30));
+$('#seek').addEventListener('input', (e) => { audio.currentTime = Number(e.target.value); });
+$('#rate').addEventListener('click', () => {
+  const i = RATES.indexOf(audio.playbackRate);
+  audio.playbackRate = RATES[(i + 1) % RATES.length];
+  state.prefs.rate = audio.playbackRate;
+  store.setPrefs(state.prefs);
+  $('#rate').textContent = `${audio.playbackRate}×`;
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest('input, select, textarea, dialog')) return;
+  if (e.key === ' ' && state.current) { e.preventDefault(); toggle(); }
+  else if (e.key === 'ArrowLeft' && state.current) skip(-15);
+  else if (e.key === 'ArrowRight' && state.current) skip(30);
+});
+
+window.addEventListener('pagehide', saveNow);
+document.addEventListener('visibilitychange', () => { if (document.hidden) saveNow(); });
+window.addEventListener('resize', setPlayerHeight);
+
+function setupMediaSession(item) {
+  if (!('mediaSession' in navigator)) return;
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: item.title,
+    artist: 'Adventures in Odyssey',
+    album: item.albums?.find((a) => a.startsWith('#')) ?? item.albums?.[0] ?? (item.isExtra ? 'Official Podcast' : ''),
+    artwork: item.image ? [{ src: item.image, sizes: '512x512' }] : [{ src: new URL('icon.svg', location.href).href, sizes: 'any', type: 'image/svg+xml' }],
+  });
+  const h = {
+    play: () => audio.play(), pause: () => audio.pause(),
+    seekbackward: () => skip(-15), seekforward: () => skip(30),
+    seekto: (d) => { audio.currentTime = d.seekTime; },
+  };
+  for (const [k, fn] of Object.entries(h)) { try { navigator.mediaSession.setActionHandler(k, fn); } catch {} }
+}
+
+/** Show the last episode in the player (paused) so the listener sees where they stopped. */
+function restoreLast() {
+  const id = store.ui().lastId;
+  const item = id && state.byId.get(id);
+  if (item && !location.hash.startsWith('#ep=') && playableNow(item)) playItem(item, { autoplay: false });
+}
+
+function openFromHash() {
+  const m = location.hash.match(/^#ep=(.+)$/);
+  const ep = m && state.byId.get(decodeURIComponent(m[1]));
+  if (!ep) return;
+  if (ep.season != null || !ep.isExtra) {
+    const det = document.querySelector(`.season[data-season="${ep.season ?? 'other'}"]`);
+    if (det && !det.open) det.open = true;
+    det?.dispatchEvent(new Event('toggle'));
+  }
+  if (playableNow(ep)) playItem(ep, { autoplay: false });
+  requestAnimationFrame(() => document.getElementById(ep.id)?.scrollIntoView({ block: 'center' }));
+}
+
+window.addEventListener('hashchange', () => {
+  const m = location.hash.match(/^#ep=(.+)$/);
+  if (m && state.current?.item.id !== decodeURIComponent(m[1])) { showView('episodes'); openFromHash(); }
+});
+
+// ---------- tabs, search, filter ----------
+
+document.querySelectorAll('.tabs [role="tab"]').forEach((tab) => {
+  tab.addEventListener('click', () => showView(tab.dataset.view));
+});
+
+function showView(view) {
+  state.view = view;
+  document.querySelectorAll('.tabs [role="tab"]').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.view === view)));
+  for (const v of ['episodes', 'continue', 'extras']) $(`#view-${v}`).hidden = v !== view;
+  if (view === 'continue') renderContinue();
+  if (view === 'extras') renderExtras();
+  if (view === 'episodes') renderEpisodes();
+}
+
+let searchTimer;
+$('#search').addEventListener('input', (e) => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { state.query = e.target.value.trim(); state.shown = PAGE; renderEpisodes(); }, 150);
+});
+$('#filter').addEventListener('change', (e) => {
+  state.filter = e.target.value;
+  store.setUi({ filter: state.filter });
+  renderEpisodes();
+});
+
+// ---------- settings ----------
+
+const dlg = $('#settings');
+$('#settings-btn').addEventListener('click', () => { renderSourcePrefs(); dlg.showModal(); });
+dlg.addEventListener('close', () => renderAll());
+
+function renderSourcePrefs() {
+  const ol = $('#source-prefs');
+  const order = state.prefs.order;
+  const counts = {};
+  for (const ep of state.data.episodes) for (const s of ep.sources) if (s.status !== 'broken') counts[s.source] = (counts[s.source] ?? 0) + 1;
+  ol.replaceChildren(...order.map((id, i) => {
+    const s = state.sourceInfo.get(id);
+    const cb = el('input', { type: 'checkbox', checked: state.prefs.enabled[id], 'aria-label': `Use ${s.name}`,
+      onchange: (e) => { state.prefs.enabled[id] = e.target.checked; store.setPrefs(state.prefs); } });
+    const move = (d) => {
+      const j = i + d;
+      [order[i], order[j]] = [order[j], order[i]];
+      store.setPrefs(state.prefs);
+      renderSourcePrefs();
+      ol.querySelectorAll('li')[j]?.querySelector(d < 0 ? '.up' : '.down')?.focus();
+    };
+    return el('li', {},
+      cb,
+      el('div', {},
+        el('div', { class: 'name' }, s.name, s.official ? null : el('span', { class: 'tag', text: 'Unofficial copy' })),
+        el('div', { class: 'desc', text: `${s.description} ${counts[id] ?? 0} links.` })),
+      el('div', { class: 'order-btns' },
+        el('button', { type: 'button', class: 'up', 'aria-label': `Move ${s.name} up`, disabled: i === 0, onclick: () => move(-1), text: '↑' }),
+        el('button', { type: 'button', class: 'down', 'aria-label': `Move ${s.name} down`, disabled: i === order.length - 1, onclick: () => move(1), text: '↓' })));
+  }));
+}
+
+$('#reset-broken').addEventListener('click', () => { store.clearBroken(); toast('Links will be retried.'); });
+$('#clear-history').addEventListener('click', () => {
+  if (!confirm('Clear all listening progress saved in this browser?')) return;
+  store.clearAllProgress();
+  toast('Listening history cleared.');
+});
+
+// ---------- toast ----------
+
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+load();

@@ -1,0 +1,9 @@
+{
+  "$comment": "Manual fixes for the matcher. links: audio URL -> episode id (e.g. \"aio-398\"), a list of ids for one file holding several episodes, or null to ignore that link. reports/match-report.md lists links that need attention.",
+  "links": {
+    "https://cdn.subsplash.com/audios/FMDDCD/368ee0eb-2558-42f9-bdb2-417dfea8cf45/audio.mp3": [
+      "aio-438a",
+      "aio-442a"
+    ]
+  }
+}
