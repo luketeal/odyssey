@@ -1,0 +1,225 @@
+# Internet Archive discovery
+
+Generated 2026-11-22T04:40:14.016Z. Report only; nothing on the site changed.
+
+- archivedFilesNotLinked: **2717**
+- stillLiveAtOriginal: **2492**
+- readableInArchive: **861**
+- withId3Title: **1896**
+- linksOnOlderDantanVersions: **0**
+- olderDantanLinksStillLive: **0**
+- identified: **1898**
+- matchedToEpisodes: **96**
+- unmatched: **1802**
+- episodesNewlyCovered: **4**
+- episodesNewlyCoveredByLiveOfficialFiles: **5**
+
+## Episodes that would become playable
+
+- aio-3 "03-22 episode-one-hundred-n" via id3 (LIVE official file)
+- aio-6 "24-21-episode-eighty-three" via id3 (LIVE official file)
+- aio-9 "15-22 episode-one-hundred-forty-seven" via id3 (LIVE official file)
+- aio-11 "10-22 episode-one-hundred-f" via id3 (LIVE official file)
+
+## Unmatched (identified but no catalog match)
+
+- "July 28, 2010: Celebrate Podcast 100 with Bob, Jesse, Brock, and clips of your favorite episodes!" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast100.mp3
+- "August 11, 2010: A tribute to our friend Paul Herlinger" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast101.mp3
+- "Dec. 29, 2010: FREE EPISODE: "Gloobers" plus an interview with Brandon Gilberstadt (Jared) and Kris Kachurak (Dwayne)" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast111.mp3
+- "Jan. 12, 2011: Hear the Avery nominations, preview an exclusive scene from "The Green Ring Conspiracy," and go behind the scenes with sound designer Todd Busteed" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast112.mp3
+- "Jan. 26, 2011: Paul McCusker and Dave Arnold answer questions about The Green Ring Conspiracy, the Stilletto, titles, and more. Plus, an audio preview of album 53." (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast113.mp3
+- "Feb. 9, 2011: Hear the results of the Averies for Album 52: Cause and Effect!" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast114.mp3
+- "March 23, 2011: Cristina Pucelli solves the mysteries as young detective Emily Jones" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast117.mp3
+- "Apr. 20, 2011: Sound designer Jonathan Crowe tells the story of his bike wreck and recovery" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast119.mp3
+- "July 13, 2011: Green Ring Art ConteSt winners, plus Imagination Station artist David Hohn" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast125.mp3
+- "July 27, 2011: The Avery Awards for "The Green Ring Conspiracy" are disrupted by a plane crash" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast126.mp3
+- "June 13, 2012: Your questions about Mitch, Eugene, Sue, and the Jacobs family answered" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast149.mp3
+- "July 25, 2012: Dave Arnold talks about the true history behind "Sergeant York" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast152.mp3
+- "Aug. 8, 2012: Hear the first glimpse of Album 56: The Grand Design, plus actor Simon Kassianides" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast153.mp3
+- "Dec. 26, 2012: FREE EPISODE: Family Portraits: "You're Not Gonna Believe This…" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast163.mp3
+- "April 3, 2013: Sound designers Dave Arnold and Bob Luttrell create the world of Adventures in Odyssey" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast170.mp3
+- "Apr. 17, 2013: Dave Arnold and Bob Luttrell (Odyssey's most prolific sound designers) share more stories from the world of audio" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast171.mp3
+- "December 25, 2013: FREE EPISODE: "The Pilot, Part 2" (plus an interview with Dave Arnold)" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast189.mp3
+- "August 8: FREE Episode - "Broken Window" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast24.mp3
+- "Sept. 19: FREE Episode: "Welcoming Wooton," plus interview with Torry Martin" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast27.mp3
+- "November 1: Producers answer, Where is Wonderworld? Why was Katrina's actress changed?" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast4.mp3
+- "Dec. 3, 2009: FREE Adventures in Odyssey episode: "You Go to School Where?" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast57.mp3
+- "Jan. 28: FREE Adventures in Odyssey episode: "Called On in Class" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast61.mp3
+- "March 20, 2008: Hear 'Random Secrets from the Novacom Saga' and journey inside the writer's room!" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast65.mp3
+- "April 8, 2009: Learn the Wild Ideas that Adventures in Odyssey Didn't Use in the 'Novacom Saga'!" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast66.mp3
+- "May 6, 2009: Hear secrets from the Odyssey Vault, plus Chick-fil-a president Dan Cathy!" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast68.mp3
+- "May 20: FREE Adventures in Odyssey episode: "Into Temptation" plus an interview with Bob Luttrell" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast69.mp3
+- "July 15, 2009: Go behind the scenes of "Sunday Morning Scramble," plus the explanation for the Snowflake Incident" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast73.mp3
+- "August 12: John Avery Whittaker: A podcast devoted to the voice of an inventor, teacher, and trusted mentor" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast75.mp3
+- "Aug. 26: FREE Episode: "Passages: Fletcher's Rebellion, Part 1" plus an interview with sound designer Rob Jorgensen" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast76.mp3
+- "Sep. 9: FREE Episode: "Passages: Fletcher's Rebellion, Part 2" plus behind the scenes with sound designer Rob Jorgensen" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast77.mp3
+- "Sept. 23: Jim Cummings, voice of King Lawrence in "Passages" and voice-over legend talks about his background, unusual projects, and playing an insane person" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast78.mp3
+- "Oct. 21, 2009: Actor Paul Herlinger (former voice of "Whit") explains the mystery of vocal foley and his experiences in Odyssey" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast80.mp3
+- "Dec. 2, 2009: The producers answer your questions about Album 51, including whether Eugene and Katrina will have a baby, the future of Tom Riley, and more" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast83.mp3
+- "Dec. 30, 2009: FREE episode: "Snow Day," plus interview with John Fornof and Rob Jorgensen" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast85.mp3
+- "Feb. 24, 2010: Hear "Welcome to Whit's End" an all-new mini-episode tour of Odyssey, plus a sneak peek at the first scene of "The Inspiration Station" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast89.mp3
+- "June 30, 2010: Hear from Dave and Paul with more questions, including "Where is Katrina?" and "What is the title of album 53?" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcast98.mp3
+- "aiopodcastamazinggrace" (filename) https://media.focusonthefamily.com/aio/mp3/aiopodcastamazinggrace.mp3
+- "FREE Adventures in Odyssey episode - "A Cheater Cheated" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcastcheatercheated.mp3
+- "May 24: FREE Episode - Kidsboro, Part 1" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcastkidsboro1.mp3
+- "May 31, 2008: FREE Episode - Kidsboro, Part 2" (id3) https://media.focusonthefamily.com/aio/mp3/aiopodcastkidsboro2.mp3
+- "aiopodcastkidsboro3" (filename) https://media.focusonthefamily.com/aio/mp3/aiopodcastkidsboro3.mp3
+- "aiopodcastpeaceonearth" (filename) https://media.focusonthefamily.com/aio/mp3/aiopodcastpeaceonearth.mp3
+- "jim ware fairytales" (filename) https://media.focusonthefamily.com/aio/mp3/jim-ware-fairytales.mp3
+- "05/09/2014" (id3) https://web.archive.org/web/20140602194048id_/http://media.focusonthefamily.com/fotf/mp3/aio/aio_20140509.mp3
+- "12/30/2020" (id3) https://web.archive.org/web/20210105053240id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20201230.mp3
+- "12/31/2020" (id3) https://web.archive.org/web/20210105053141id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20201231.mp3
+- "3/4/2021" (id3) https://web.archive.org/web/20210311235824id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20210304.mp3
+- "3/5/2021" (id3) https://web.archive.org/web/20210311235950id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20210305.mp3
+- "7/23/2021" (id3) https://web.archive.org/web/20210731021052id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20210723.mp3
+- "7/26/2021" (id3) https://web.archive.org/web/20210731044917id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20210726.mp3
+- "7/27/2021" (id3) https://web.archive.org/web/20210731045015id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20210727.mp3
+- "12/13/2021" (id3) https://web.archive.org/web/20211218200429id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20211213.mp3
+- "12/14/2021" (id3) https://web.archive.org/web/20211218200441id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20211214.mp3
+- "11/6/2023" (id3) https://web.archive.org/web/20231219192958id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231106.mp3
+- "11/7/2023" (id3) https://web.archive.org/web/20231219192925id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231107.mp3
+- "11/8/2023" (id3) https://web.archive.org/web/20231219192857id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231108.mp3
+- "11/9/2023" (id3) https://web.archive.org/web/20231219192757id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231109.mp3
+- "11/10/2023" (id3) https://web.archive.org/web/20231219192716id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231110.mp3
+- "11/13/2023" (id3) https://web.archive.org/web/20231219192536id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231113.mp3
+- "11/14/2023" (id3) https://web.archive.org/web/20231219192444id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231114.mp3
+- "11/15/2023" (id3) https://web.archive.org/web/20231219192339id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231115.mp3
+- "11/16/2023" (id3) https://web.archive.org/web/20231219192327id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231116.mp3
+- "11/17/2023" (id3) https://web.archive.org/web/20231219192236id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231117.mp3
+- "11/20/2023" (id3) https://web.archive.org/web/20231219192000id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231120.mp3
+- "11/22/2023" (id3) https://web.archive.org/web/20231219191838id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231122.mp3
+- "11/23/2023" (id3) https://web.archive.org/web/20231219191756id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231123.mp3
+- "11/24/2023" (id3) https://web.archive.org/web/20231219191636id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231124.mp3
+- "11/27/2023" (id3) https://web.archive.org/web/20231219191518id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231127.mp3
+- "11/28/2023" (id3) https://web.archive.org/web/20231219191419id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231128.mp3
+- "11/29/2023" (id3) https://web.archive.org/web/20231219191326id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231129.mp3
+- "11/30/2023" (id3) https://web.archive.org/web/20231219191311id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231130.mp3
+- "12/1/2023" (id3) https://web.archive.org/web/20231219191153id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231201.mp3
+- "12/4/2023" (id3) https://web.archive.org/web/20231219191030id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231204.mp3
+- "12/6/2023" (id3) https://web.archive.org/web/20231219190932id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231206.mp3
+- "12/7/2023" (id3) https://web.archive.org/web/20231219190916id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231207.mp3
+- "12/8/2023" (id3) https://web.archive.org/web/20231219190743id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231208.mp3
+- "12/11/2023" (id3) https://web.archive.org/web/20231219190639id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231211.mp3
+- "12/12/2023" (id3) https://web.archive.org/web/20231219190545id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231212.mp3
+- "12/13/2023" (id3) https://web.archive.org/web/20231219190500id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231213.mp3
+- "12/14/2023" (id3) https://web.archive.org/web/20231219190439id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231214.mp3
+- "12/15/2023" (id3) https://web.archive.org/web/20231219190149id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231215.mp3
+- "12/18/2023" (id3) https://web.archive.org/web/20240201032416id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231218.mp3
+- "12/19/2023" (id3) https://web.archive.org/web/20240201032359id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231219.mp3
+- "12/20/2023" (id3) https://web.archive.org/web/20231219184544id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231220.mp3
+- "12/21/2023" (id3) https://web.archive.org/web/20231219184847id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231221.mp3
+- "12/22/2023" (id3) https://web.archive.org/web/20231219185005id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231222.mp3
+- "12/25/2023" (id3) https://web.archive.org/web/20231219185202id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231225.mp3
+- "12/26/2023" (id3) https://web.archive.org/web/20231219185400id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231226.mp3
+- "12/27/2023" (id3) https://web.archive.org/web/20240201032154id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231227.mp3
+- "12/28/2023" (id3) https://web.archive.org/web/20240201032140id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231228.mp3
+- "12/29/2023" (id3) https://web.archive.org/web/20240201032123id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20231229.mp3
+- "1/1/2024" (id3) https://web.archive.org/web/20240111151523id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240101.mp3
+- "1/2/2024" (id3) https://web.archive.org/web/20240111151513id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240102.mp3
+- "1/3/2024" (id3) https://web.archive.org/web/20240111151504id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240103.mp3
+- "1/4/2024" (id3) https://web.archive.org/web/20240111151456id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240104.mp3
+- "1/5/2024" (id3) https://web.archive.org/web/20240111151447id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240105.mp3
+- "1/8/2024" (id3) https://web.archive.org/web/20240111151427id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240108.mp3
+- "1/9/2024" (id3) https://web.archive.org/web/20240111151419id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240109.mp3
+- "1/10/2024" (id3) https://web.archive.org/web/20240111151409id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240110.mp3
+- "1/11/2024" (id3) https://web.archive.org/web/20240118175152id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240111.mp3
+- "1/12/2024" (id3) https://web.archive.org/web/20240118175136id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240112.mp3
+- "1/15/2024" (id3) https://web.archive.org/web/20240118175100id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240115.mp3
+- "1/16/2024" (id3) https://web.archive.org/web/20240118175042id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240116.mp3
+- "1/17/2024" (id3) https://web.archive.org/web/20240111150203id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240117.mp3
+- "1/18/2024" (id3) https://web.archive.org/web/20240118171506id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240118.mp3
+- "1/19/2024" (id3) https://web.archive.org/web/20240124205146id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240119.mp3
+- "1/22/2024" (id3) https://web.archive.org/web/20240124205117id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240122.mp3
+- "1/23/2024" (id3) https://web.archive.org/web/20240124205104id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240123.mp3
+- "1/24/2024" (id3) https://web.archive.org/web/20240124205050id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240124.mp3
+- "1/25/2024" (id3) https://web.archive.org/web/20240124205037id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240125.mp3
+- "1/26/2024" (id3) https://web.archive.org/web/20240201033839id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240126.mp3
+- "2/12/2024" (id3) https://web.archive.org/web/20240224095131id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240212.mp3
+- "2/13/2024" (id3) https://web.archive.org/web/20240224095117id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240213.mp3
+- "2/14/2024" (id3) https://web.archive.org/web/20240224095056id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240214.mp3
+- "2/15/2024" (id3) https://web.archive.org/web/20240224095038id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240215.mp3
+- "2/16/2024" (id3) https://web.archive.org/web/20240224095001id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240216.mp3
+- "2/19/2024" (id3) https://web.archive.org/web/20240222214547id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20240219.mp3
+- "6/16/2025" (id3) https://web.archive.org/web/20250811080829id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250616.mp3
+- "6/17/2025" (id3) https://web.archive.org/web/20250811080814id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250617.mp3
+- "6/18/2025" (id3) https://web.archive.org/web/20250811080759id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250618.mp3
+- "6/20/2025" (id3) https://web.archive.org/web/20250811080744id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250620.mp3
+- "6/23/2025" (id3) https://web.archive.org/web/20250811080721id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250623.mp3
+- "6/24/2025" (id3) https://web.archive.org/web/20250811080712id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250624.mp3
+- "6/25/2025" (id3) https://web.archive.org/web/20250811080702id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250625.mp3
+- "6/26/2025" (id3) https://web.archive.org/web/20250811080650id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250626.mp3
+- "6/27/2025" (id3) https://web.archive.org/web/20250811080637id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250627.mp3
+- "6/30/2025" (id3) https://web.archive.org/web/20250811080612id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250630.mp3
+- "7/1/2025" (id3) https://web.archive.org/web/20250805170445id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250701.mp3
+- "7/2/2025" (id3) https://web.archive.org/web/20250805170436id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250702.mp3
+- "7/3/2025" (id3) https://web.archive.org/web/20250805170425id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250703.mp3
+- "7/4/2025" (id3) https://web.archive.org/web/20250805170416id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250704.mp3
+- "7/7/2025" (id3) https://web.archive.org/web/20250805170353id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250707.mp3
+- "7/8/2025" (id3) https://web.archive.org/web/20250805170341id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250708.mp3
+- "7/9/2025" (id3) https://web.archive.org/web/20250805170330id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250709.mp3
+- "7/10/2025" (id3) https://web.archive.org/web/20250805170322id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250710.mp3
+- "7/11/2025" (id3) https://web.archive.org/web/20250805170313id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250711.mp3
+- "7/14/2025" (id3) https://web.archive.org/web/20250805170256id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250714.mp3
+- "7/15/2025" (id3) https://web.archive.org/web/20250805170245id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250715.mp3
+- "7/16/2025" (id3) https://web.archive.org/web/20250805170235id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250716.mp3
+- "7/17/2025" (id3) https://web.archive.org/web/20250805170226id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250717.mp3
+- "7/18/2025" (id3) https://web.archive.org/web/20250805170219id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250718.mp3
+- "7/21/2025" (id3) https://web.archive.org/web/20250805170158id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250721.mp3
+- "7/22/2025" (id3) https://web.archive.org/web/20250805170148id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250722.mp3
+- "7/23/2025" (id3) https://web.archive.org/web/20250805171319id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250723.mp3
+- "7/24/2025" (id3) https://web.archive.org/web/20250805171308id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250724.mp3
+- "7/25/2025" (id3) https://web.archive.org/web/20250805171256id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250725.mp3
+- "7/28/2025" (id3) https://web.archive.org/web/20250805171234id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250728.mp3
+- "7/29/2025" (id3) https://web.archive.org/web/20250805171225id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250729.mp3
+- "7/30/2025" (id3) https://web.archive.org/web/20250805171211id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250730.mp3
+- "7/31/2025" (id3) https://web.archive.org/web/20250805171201id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250731.mp3
+- "8/1/2025" (id3) https://web.archive.org/web/20250805171148id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250801.mp3
+- "8/4/2025" (id3) https://web.archive.org/web/20250805162551id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250804.mp3
+- "8/5/2025" (id3) https://web.archive.org/web/20250805162537id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250805.mp3
+- "8/6/2025" (id3) https://web.archive.org/web/20250805162522id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250806.mp3
+- "8/7/2025" (id3) https://web.archive.org/web/20250805162509id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250807.mp3
+- "8/8/2025" (id3) https://web.archive.org/web/20250805162454id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250808.mp3
+- "8/11/2025" (id3) https://web.archive.org/web/20250805171612id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250811.mp3
+- "8/12/2025" (id3) https://web.archive.org/web/20250811081538id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250812.mp3
+- "8/13/2025" (id3) https://web.archive.org/web/20250817030214id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250813.mp3
+- "8/14/2025" (id3) https://web.archive.org/web/20250821231337id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250814.mp3
+- "8/15/2025" (id3) https://web.archive.org/web/20250823131833id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250815.mp3
+- "8/18/2025" (id3) https://web.archive.org/web/20250826143603id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250818.mp3
+- "8/19/2025" (id3) https://web.archive.org/web/20250830202828id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250819.mp3
+- "8/20/2025" (id3) https://web.archive.org/web/20250828030034id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250820.mp3
+- "8/21/2025" (id3) https://web.archive.org/web/20250901032449id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250821.mp3
+- "8/22/2025" (id3) https://web.archive.org/web/20250829115656id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250822.mp3
+- "8/25/2025" (id3) https://web.archive.org/web/20250830202556id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250825.mp3
+- "8/26/2025" (id3) https://web.archive.org/web/20250901032216id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250826.mp3
+- "8/27/2025" (id3) https://web.archive.org/web/20250902175716id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250827.mp3
+- "8/29/2025" (id3) https://web.archive.org/web/20250901033222id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20250829.mp3
+- "12/4/2025" (id3) https://web.archive.org/web/20251231211425id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20251204.mp3
+- "12/18/2025" (id3) https://web.archive.org/web/20251231211318id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20251218.mp3
+- "12/25/2025" (id3) https://web.archive.org/web/20251231204623id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20251225.mp3
+- "3/13/2026" (id3) https://web.archive.org/web/20260316041854id_/https://media.focusonthefamily.com/fotf/mp3/aio/aio_20260313.mp3
+- "Weekend 7/24/2021" (id3) https://web.archive.org/web/20210731021114id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20210724.mp3
+- "Weekend 3/4/2023" (id3) https://web.archive.org/web/20230309154815id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20230304.mp3
+- "Weekend 3/11/2023" (id3) https://web.archive.org/web/20230309155149id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20230311.mp3
+- "Weekend 11/11/2023" (id3) https://web.archive.org/web/20231219192638id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20231111.mp3
+- "Weekend 11/18/2023" (id3) https://web.archive.org/web/20231219192126id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20231118.mp3
+- "Weekend 11/25/2023" (id3) https://web.archive.org/web/20231219191548id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20231125.mp3
+- "Weekend 12/2/2023" (id3) https://web.archive.org/web/20231219191109id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20231202.mp3
+- "Weekend 12/9/2023" (id3) https://web.archive.org/web/20231219190702id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20231209.mp3
+- "Weekend 12/16/2023" (id3) https://web.archive.org/web/20231219185759id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20231216.mp3
+- "Weekend 1/6/2024" (id3) https://web.archive.org/web/20240111151438id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20240106.mp3
+- "Weekend 1/13/2024" (id3) https://web.archive.org/web/20240118175117id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20240113.mp3
+- "Weekend 1/20/2024" (id3) https://web.archive.org/web/20240124205133id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20240120.mp3
+- "Weekend 1/27/2024" (id3) https://web.archive.org/web/20240210110432id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20240127.mp3
+- "Weekend 2/17/2024" (id3) https://web.archive.org/web/20240224094810id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20240217.mp3
+- "Weekend 6/21/2025" (id3) https://web.archive.org/web/20250811080732id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20250621.mp3
+- "Weekend 6/28/2025" (id3) https://web.archive.org/web/20250811080622id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20250628.mp3
+- "Weekend 7/5/2025" (id3) https://web.archive.org/web/20250805170405id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20250705.mp3
+- "Weekend 7/12/2025" (id3) https://web.archive.org/web/20250805170305id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20250712.mp3
+- "Weekend 7/26/2025" (id3) https://web.archive.org/web/20250805171246id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20250726.mp3
+- "Weekend 8/2/2025" (id3) https://web.archive.org/web/20250805171139id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20250802.mp3
+- "Weekend 8/9/2025" (id3) https://web.archive.org/web/20250805162441id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20250809.mp3
+- "Weekend 8/16/2025" (id3) https://web.archive.org/web/20250825045042id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20250816.mp3
+- "Weekend 8/23/2025" (id3) https://web.archive.org/web/20250829120248id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20250823.mp3
+- "Weekend 8/30/2025" (id3) https://web.archive.org/web/20250902180016id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20250830.mp3
+- "Weekend 1/24/2026" (id3) https://web.archive.org/web/20260316041705id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20260124.mp3
+- "Weekend 1/31/2026" (id3) https://web.archive.org/web/20260316041650id_/https://media.focusonthefamily.com/fotf/mp3/aio/aiow_20260131.mp3
