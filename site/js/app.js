@@ -483,7 +483,30 @@ $('#filter').addEventListener('change', (e) => {
 // ---------- settings ----------
 
 const dlg = $('#settings');
-$('#settings-btn').addEventListener('click', () => { renderSourcePrefs(); dlg.showModal(); });
+$('#settings-btn').addEventListener('click', () => { renderSourcePrefs(); renderPersist(); dlg.showModal(); });
+
+function renderPersist() {
+  const on = store.isPersistent();
+  $('#persist-toggle').checked = on;
+  $('#persist-desc').textContent = on
+    ? 'Your progress, last-played episode and source choices are kept in this browser only. They are never sent anywhere.'
+    : "Nothing is saved. Progress works while this page is open and is forgotten when you close it. (The browser keeps only this \"don't save\" choice.)";
+}
+
+$('#persist-toggle').addEventListener('change', (e) => {
+  if (!e.target.checked) {
+    if (!confirm('Stop saving in this browser? Saved progress and settings will be deleted from this browser. This visit keeps working until you close the page.')) {
+      e.target.checked = true;
+      return;
+    }
+    store.setPersistent(false);
+    toast('Saved data deleted. Nothing will be saved from now on.');
+  } else {
+    store.setPersistent(true);
+    toast('Progress and settings will be saved in this browser.');
+  }
+  renderPersist();
+});
 dlg.addEventListener('close', () => {
   renderAll();
   if (state.current) renderSourceSelect();

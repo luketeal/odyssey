@@ -3,7 +3,7 @@
 An unofficial fan web app that gathers publicly posted *Adventures in Odyssey* episodes into one list and plays them in the browser. It runs entirely on GitHub Pages:
 
 - **No audio is hosted here.** The app only links to files published elsewhere.
-- **No user data leaves the browser.** Listening progress, "last played" and source settings live in the visitor's `localStorage`.
+- **No user data leaves the browser.** Listening progress, "last played" and source settings live in the visitor's `localStorage`. Listeners can turn saving off in **Settings → Your data**. That deletes what was saved, keeps this visit's progress in memory only, and leaves a single `aio:no-storage` marker so the choice sticks.
 
 Not affiliated with or endorsed by Focus on the Family. *Adventures in Odyssey* is a trademark of Focus on the Family.
 

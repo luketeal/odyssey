@@ -64,7 +64,7 @@
 
     <footer class="site-foot">
       <p><strong>This is an unofficial fan project</strong> and is not affiliated with or endorsed by Focus on the Family. <em>Adventures in Odyssey</em> is a trademark of Focus on the Family. This site hosts no audio; it links to files published elsewhere. To support the show, visit <a href="https://www.adventuresinodyssey.com/" rel="noopener" target="_blank">adventuresinodyssey.com</a> or join the Adventures in Odyssey Club.</p>
-      <p>Episode list from <a href="https://en.wikipedia.org/wiki/List_of_Adventures_in_Odyssey_episodes" rel="noopener" target="_blank">Wikipedia</a>. Your listening history is stored only in this browser. <span id="data-date"></span></p>
+      <p>Episode list from <a href="https://en.wikipedia.org/wiki/List_of_Adventures_in_Odyssey_episodes" rel="noopener" target="_blank">Wikipedia</a>. Your listening history is never sent anywhere; you can choose whether this browser keeps it. <span id="data-date"></span></p>
     </footer>
   </main>
 
@@ -111,7 +111,13 @@
       <p class="hint">The player uses the highest source that's turned on and working. If a link fails it moves to the next one automatically.</p>
       <ol id="source-prefs" class="source-prefs"></ol>
       <h3>Your data</h3>
-      <p class="hint">Progress and settings are saved only in this browser.</p>
+      <label class="toggle-row">
+        <input type="checkbox" id="persist-toggle">
+        <span>
+          <span class="name">Save my progress and settings in this browser</span>
+          <span class="desc" id="persist-desc"></span>
+        </span>
+      </label>
       <div class="btn-row">
         <button type="button" class="btn" id="reset-broken">Retry links that failed here</button>
         <button type="button" class="btn danger" id="clear-history">Clear listening history</button>
