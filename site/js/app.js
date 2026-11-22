@@ -285,11 +285,15 @@ function renderSourceSelect() {
   const { item, source } = state.current;
   const broken = localBroken();
   const sel = $('#np-source');
-  const sources = [...(item.sources ?? [])].sort((a, b) => state.prefs.order.indexOf(a.source) - state.prefs.order.indexOf(b.source));
+  // Only sources the listener has turned on (plus whatever is loaded right now, so the menu
+  // never shows the wrong copy). Links the scraper confirmed dead can't play, so they're left out.
+  const sources = (item.sources ?? [])
+    .filter((s) => s.url === source.url || (state.prefs.enabled[s.source] && s.status !== 'broken'))
+    .sort((a, b) => state.prefs.order.indexOf(a.source) - state.prefs.order.indexOf(b.source));
   sel.replaceChildren(...sources.map((s) => {
     const notes = [];
     if (!state.prefs.enabled[s.source]) notes.push('off in settings');
-    if (s.status === 'broken' || broken[s.url]) notes.push('not working');
+    if (broken[s.url]) notes.push('failed here recently');
     const text = `From: ${sourceName(s.source)}${s.label ? ` (${s.label})` : ''}${notes.length ? ` [${notes.join(', ')}]` : ''}`;
     return el('option', { value: s.url, selected: s.url === source.url, text });
   }));
@@ -480,7 +484,10 @@ $('#filter').addEventListener('change', (e) => {
 
 const dlg = $('#settings');
 $('#settings-btn').addEventListener('click', () => { renderSourcePrefs(); dlg.showModal(); });
-dlg.addEventListener('close', () => renderAll());
+dlg.addEventListener('close', () => {
+  renderAll();
+  if (state.current) renderSourceSelect();
+});
 
 function renderSourcePrefs() {
   const ol = $('#source-prefs');
