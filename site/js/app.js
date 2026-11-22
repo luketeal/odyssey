@@ -460,11 +460,15 @@ function setupMediaSession(item) {
     title: item.title,
     artist: 'Adventures in Odyssey',
     album: item.albums?.find((a) => a.startsWith('#')) ?? item.albums?.[0] ?? (item.isExtra ? 'Official Podcast' : ''),
-    artwork: item.image ? [{ src: item.image, sizes: '512x512' }] : [{ src: new URL('icon.svg', location.href).href, sizes: 'any', type: 'image/svg+xml' }],
+    // Square PNGs: iOS shows SVG artwork shrunk into a corner of a white tile on the lock screen.
+    artwork: item.image
+      ? [{ src: item.image, sizes: '512x512' }]
+      : [192, 512].map((n) => ({ src: new URL(`icon-${n}.png`, location.href).href, sizes: `${n}x${n}`, type: 'image/png' })),
   });
   const h = {
     play: () => audio.play(), pause: () => audio.pause(),
-    seekbackward: () => skip(-15), seekforward: () => skip(30),
+    // Lock-screen buttons skip by the amount the system draws on them (10s on iPhone).
+    seekbackward: (d) => skip(-(d?.seekOffset || 10)), seekforward: (d) => skip(d?.seekOffset || 10),
     seekto: (d) => { audio.currentTime = d.seekTime; },
   };
   for (const [k, fn] of Object.entries(h)) { try { navigator.mediaSession.setActionHandler(k, fn); } catch {} }
