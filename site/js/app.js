@@ -501,15 +501,23 @@ function unsavedSummary() {
 
 function updateSaveIndicator() {
   const btn = $('#save-btn');
-  const show = store.hasUnsaved();
-  btn.hidden = !show;
-  btn.classList.toggle('quiet', quiet);
-  btn.setAttribute('aria-label', show ? `Unsaved progress for ${unsavedSummary()}. Save it` : 'Save');
+  const auto = store.mode() === 'auto';
+  const unsaved = store.hasUnsaved();
+  // Three states: unsaved changes (save icon + dot), autosaving (check icon), or nothing to show.
+  btn.hidden = !auto && !unsaved;
+  btn.classList.toggle('auto', auto);
+  btn.classList.toggle('unsaved', unsaved);
+  btn.classList.toggle('quiet', quiet && unsaved);
+  const label = auto ? 'Autosave is on: progress is saved in this browser'
+    : unsaved ? `Unsaved progress for ${unsavedSummary()}. Save it` : 'Save';
+  btn.setAttribute('aria-label', label);
+  btn.title = label;
+  btn.setAttribute('aria-haspopup', 'dialog');
   // One gentle nudge per visit the first time there is something to lose.
-  if (show && !nudged && store.mode() === 'none') {
+  if (unsaved && !nudged && store.mode() === 'none') {
     nudged = true;
     btn.classList.add('nudge');
-    toast('Your progress isn\'t being saved yet. Tap Save at the top to keep it.');
+    toast('Your progress isn\'t being saved yet. Tap the save icon at the top to keep it.');
   }
   if (dlg.open) renderSaveSettings();
 }
@@ -529,6 +537,14 @@ function renderSaveSettings() {
 
 $('#save-btn').addEventListener('click', () => {
   $('#save-btn').classList.remove('nudge');
+  if (store.mode() === 'auto') {
+    // Autosaving: open Settings at the saving options instead of the save prompt.
+    renderSourcePrefs();
+    renderSaveSettings();
+    dlg.showModal();
+    $('#autosave-toggle').closest('label').scrollIntoView({ block: 'center' });
+    return;
+  }
   $('#save-msg').textContent = store.mode() === 'manual'
     ? `You have changes to ${unsavedSummary()} that aren't saved yet. Your last save will load next time unless you save again.`
     : `Nothing is saved right now, so closing this page loses your place in ${unsavedSummary()}.`;
