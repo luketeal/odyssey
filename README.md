@@ -3,7 +3,7 @@
 An unofficial fan web app that gathers publicly posted *Adventures in Odyssey* episodes into one list and plays them in the browser. It runs entirely on GitHub Pages:
 
 - **No audio is hosted here.** The app only links to files published elsewhere.
-- **No user data leaves the browser.** Listening progress, "last played" and source settings live in the visitor's `localStorage`.
+- **No user data leaves the browser, and by default nothing is stored at all.** Progress, "last played" and source settings are kept in memory. Once there's something worth keeping, a **Save** button with a dot appears at the top right. It offers *Save and turn on autosave*, *Save just this once*, or *Not now*. Saved data goes only to the visitor's `localStorage`, and **Settings → Your data** can turn autosave off or delete everything.
 
 Not affiliated with or endorsed by Focus on the Family. *Adventures in Odyssey* is a trademark of Focus on the Family.
 
@@ -43,7 +43,7 @@ Edit `config/sources.json` to change defaults. Set `"scrape": false` to drop a s
 - If a link fails to load, or doesn't respond within 20 seconds, the player switches to the next source automatically and remembers the failure in that browser for 3 days.
 - A "Playing from" menu lets listeners switch copies on the spot.
 - Progress is saved **per copy**, because broadcast and album versions differ in length. When switching copies mid-episode, the position is converted proportionally.
-- The app remembers the last episode. Reopening the site shows it paused at the spot where the listener stopped. Links like `#ep=aio-398` open a specific episode.
+- If the listener has saved, the app remembers the last episode. Reopening the site shows it paused at the spot where they stopped. Links like `#ep=aio-398` open a specific episode.
 
 ## Fixing matches
 

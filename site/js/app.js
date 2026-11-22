@@ -285,11 +285,15 @@ function renderSourceSelect() {
   const { item, source } = state.current;
   const broken = localBroken();
   const sel = $('#np-source');
-  const sources = [...(item.sources ?? [])].sort((a, b) => state.prefs.order.indexOf(a.source) - state.prefs.order.indexOf(b.source));
+  // Only sources the listener has turned on (plus whatever is loaded right now, so the menu
+  // never shows the wrong copy). Links the scraper confirmed dead can't play, so they're left out.
+  const sources = (item.sources ?? [])
+    .filter((s) => s.url === source.url || (state.prefs.enabled[s.source] && s.status !== 'broken'))
+    .sort((a, b) => state.prefs.order.indexOf(a.source) - state.prefs.order.indexOf(b.source));
   sel.replaceChildren(...sources.map((s) => {
     const notes = [];
     if (!state.prefs.enabled[s.source]) notes.push('off in settings');
-    if (s.status === 'broken' || broken[s.url]) notes.push('not working');
+    if (broken[s.url]) notes.push('failed here recently');
     const text = `From: ${sourceName(s.source)}${s.label ? ` (${s.label})` : ''}${notes.length ? ` [${notes.join(', ')}]` : ''}`;
     return el('option', { value: s.url, selected: s.url === source.url, text });
   }));
@@ -479,8 +483,79 @@ $('#filter').addEventListener('change', (e) => {
 // ---------- settings ----------
 
 const dlg = $('#settings');
-$('#settings-btn').addEventListener('click', () => { renderSourcePrefs(); dlg.showModal(); });
-dlg.addEventListener('close', () => renderAll());
+$('#settings-btn').addEventListener('click', () => { renderSourcePrefs(); renderSaveSettings(); dlg.showModal(); });
+
+// ---------- saving (off by default) ----------
+
+const saveDlg = $('#save-dlg');
+let nudged = false;
+
+function unsavedSummary() {
+  const n = Object.values(store.allProgress()).filter((p) => p.done || fraction(p) > 0).length;
+  return n ? `${n} episode${n === 1 ? '' : 's'}` : 'your settings';
+}
+
+function updateSaveIndicator() {
+  const btn = $('#save-btn');
+  const show = store.hasUnsaved();
+  btn.hidden = !show;
+  btn.setAttribute('aria-label', show ? `Unsaved progress for ${unsavedSummary()}. Save it` : 'Save');
+  // One gentle nudge per visit the first time there is something to lose.
+  if (show && !nudged && store.mode() === 'none') {
+    nudged = true;
+    btn.classList.add('nudge');
+    toast('Your progress isn\'t being saved yet. Tap Save at the top to keep it.');
+  }
+  if (dlg.open) renderSaveSettings();
+}
+store.onChange(updateSaveIndicator);
+
+function renderSaveSettings() {
+  const mode = store.mode();
+  const when = store.lastSaved() ? new Date(store.lastSaved()).toLocaleString() : null;
+  $('#autosave-toggle').checked = mode === 'auto';
+  $('#save-status').textContent =
+    mode === 'auto' ? 'Autosave is on. Your progress is saved in this browser as you listen.'
+    : mode === 'manual' ? `Saved in this browser${when ? ` on ${when}` : ''}.${store.hasUnsaved() ? ' You have newer changes that are not saved.' : ''}`
+    : 'Nothing is saved in this browser. Your progress is kept only until you close this page.';
+  $('#save-once-settings').hidden = mode === 'auto';
+  $('#delete-saved').hidden = mode === 'none';
+}
+
+$('#save-btn').addEventListener('click', () => {
+  $('#save-btn').classList.remove('nudge');
+  $('#save-msg').textContent = store.mode() === 'manual'
+    ? `You have changes to ${unsavedSummary()} that aren't saved yet. Your last save will load next time unless you save again.`
+    : `Nothing is saved right now, so closing this page loses your place in ${unsavedSummary()}.`;
+  saveDlg.showModal();
+});
+
+function doSave(auto) {
+  const ok = auto ? store.setAutosave(true) : store.saveOnce();
+  toast(ok
+    ? (auto ? 'Saved. Autosave is on.' : 'Saved in this browser.')
+    : 'This browser blocked saving (private browsing, or storage turned off).');
+}
+$('#save-auto').addEventListener('click', () => { doSave(true); saveDlg.close(); });
+$('#save-once').addEventListener('click', () => { doSave(false); saveDlg.close(); });
+$('#save-once-settings').addEventListener('click', () => { doSave(false); renderSaveSettings(); });
+
+$('#autosave-toggle').addEventListener('change', (e) => {
+  if (e.target.checked) doSave(true);
+  else { store.setAutosave(false); toast('Autosave is off. What is already saved stays until you delete it.'); }
+  renderSaveSettings();
+});
+
+$('#delete-saved').addEventListener('click', () => {
+  if (!confirm('Delete everything this player saved in this browser? Your progress from this visit stays until you close the page.')) return;
+  store.deleteSaved();
+  toast('Saved data deleted from this browser.');
+  renderSaveSettings();
+});
+dlg.addEventListener('close', () => {
+  renderAll();
+  if (state.current) renderSourceSelect();
+});
 
 function renderSourcePrefs() {
   const ol = $('#source-prefs');
@@ -527,4 +602,5 @@ function toast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
 }
 
+updateSaveIndicator();
 load();

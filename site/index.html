@@ -19,9 +19,15 @@
           <p class="sub">Unofficial fan player</p>
         </div>
       </div>
+      <div class="top-actions">
+      <button class="save-btn" id="save-btn" type="button" aria-haspopup="dialog" hidden>
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7zm-5 16a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm3-10H5V5h10z"/></svg>
+        <span>Save</span><i class="dot" aria-hidden="true"></i>
+      </button>
       <button class="icon-btn" id="settings-btn" type="button" aria-haspopup="dialog" aria-label="Settings">
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.6 7.6 0 0 0-1.7-1L15 3.3h-4l-.4 2.6a7.6 7.6 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1l.4 2.6h4l.4-2.6c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg>
       </button>
+      </div>
     </div>
     <div class="wrap">
       <nav class="tabs" role="tablist">
@@ -64,7 +70,7 @@
 
     <footer class="site-foot">
       <p><strong>This is an unofficial fan project</strong> and is not affiliated with or endorsed by Focus on the Family. <em>Adventures in Odyssey</em> is a trademark of Focus on the Family. This site hosts no audio; it links to files published elsewhere. To support the show, visit <a href="https://www.adventuresinodyssey.com/" rel="noopener" target="_blank">adventuresinodyssey.com</a> or join the Adventures in Odyssey Club.</p>
-      <p>Episode list from <a href="https://en.wikipedia.org/wiki/List_of_Adventures_in_Odyssey_episodes" rel="noopener" target="_blank">Wikipedia</a>. Your listening history is stored only in this browser. <span id="data-date"></span></p>
+      <p>Episode list from <a href="https://en.wikipedia.org/wiki/List_of_Adventures_in_Odyssey_episodes" rel="noopener" target="_blank">Wikipedia</a>. Your listening history is never sent anywhere; you can choose whether this browser keeps it. <span id="data-date"></span></p>
     </footer>
   </main>
 
@@ -111,10 +117,37 @@
       <p class="hint">The player uses the highest source that's turned on and working. If a link fails it moves to the next one automatically.</p>
       <ol id="source-prefs" class="source-prefs"></ol>
       <h3>Your data</h3>
-      <p class="hint">Progress and settings are saved only in this browser.</p>
+      <p class="hint" id="save-status"></p>
+      <label class="toggle-row">
+        <input type="checkbox" id="autosave-toggle">
+        <span>
+          <span class="name">Autosave progress and settings in this browser</span>
+          <span class="desc">Saved only on this device and never sent anywhere. Off by default.</span>
+        </span>
+      </label>
+      <div class="btn-row">
+        <button type="button" class="btn" id="save-once-settings">Save now</button>
+        <button type="button" class="btn danger" id="delete-saved">Delete saved data from this browser</button>
+      </div>
       <div class="btn-row">
         <button type="button" class="btn" id="reset-broken">Retry links that failed here</button>
         <button type="button" class="btn danger" id="clear-history">Clear listening history</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="save-dlg" aria-labelledby="save-title">
+    <form method="dialog" class="dlg">
+      <div class="dlg-head">
+        <h2 id="save-title">Keep your place?</h2>
+        <button class="icon-btn" value="close" aria-label="Close">✕</button>
+      </div>
+      <p id="save-msg"></p>
+      <p class="hint">Saving keeps your progress, last-played episode and source settings in this browser only. Nothing is sent anywhere, and you can delete it any time in Settings.</p>
+      <div class="btn-col">
+        <button type="button" class="btn primary" id="save-auto">Save and turn on autosave</button>
+        <button type="button" class="btn" id="save-once">Save just this once</button>
+        <button class="btn plain" value="later">Not now</button>
       </div>
     </form>
   </dialog>
