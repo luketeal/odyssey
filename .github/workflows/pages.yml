@@ -12,6 +12,10 @@ on:
         description: 'Also re-check Internet Archive links'
         type: boolean
         default: false
+      force_new_version:
+        description: 'Force a new app version (open apps reload even if nothing changed; for testing)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -74,6 +78,8 @@ jobs:
         # a new page with an old cached stylesheet or script.
         run: |
           v="$(git rev-parse --short=8 HEAD)"
+          # Manual runs can force a new version so open apps reload even when nothing changed.
+          if [ "${{ inputs.force_new_version }}" = "true" ]; then v="$v-r${{ github.run_number }}"; fi
           sed -i "s/?v=dev/?v=$v/g" site/index.html site/js/app.js
           grep -q "?v=$v" site/index.html
           # The app compares this with its own version to know when to reload itself.

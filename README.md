@@ -75,6 +75,6 @@ npm run serve              # http://localhost:3000
 ## Deploying
 
 1. In the repository settings, go to **Pages → Build and deployment → Source** and choose **GitHub Actions**.
-2. Merge to `main`. The `Update episodes and deploy` workflow deploys on every push, refreshes links nightly, and re-checks archive links on Sundays. You can also run it by hand from the **Actions** tab.
+2. Merge to `main`. The `Update episodes and deploy` workflow deploys on every push, refreshes links nightly, and re-checks archive links on Sundays. You can also run it by hand from the **Actions** tab. Tick **Force a new app version** to make already-open apps reload even when nothing changed, which is useful for testing the auto-update.
 
 The workflow sends the repository URL as contact info in the scraper's `User-Agent`, as Wikimedia asks automated clients to do.
