@@ -1,3 +1,24 @@
 {
- "items": []
+ "items": [
+  {
+   "kind": "unmatched",
+   "url": "https://example.invalid/review-test.mp3",
+   "title": "Review test item",
+   "source": "test",
+   "test": true,
+   "why": "Test item from a simulated run. Ticking a box here changes nothing.",
+   "choices": [
+    {
+     "do": "match",
+     "ep": "aio-1",
+     "label": "✅ It's #1 Whit's Flop"
+    },
+    {
+     "do": "ignore",
+     "label": "🚫 Ignore this link (not an episode)"
+    }
+   ],
+   "n": 1
+  }
+ ]
 }
