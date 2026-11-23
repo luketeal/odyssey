@@ -12,6 +12,10 @@ on:
         description: 'Also re-check Internet Archive links'
         type: boolean
         default: false
+      simulate_review:
+        description: 'Add a test item to the Match review issue (tests it end to end)'
+        type: boolean
+        default: false
       simulate_alert:
         description: 'Simulate an alert (tests the alert issue end to end)'
         type: boolean
@@ -49,6 +53,7 @@ jobs:
           # Identifies the scraper to the sites it reads (Wikimedia asks for contact info).
           SCRAPER_CONTACT: ${{ github.server_url }}/${{ github.repository }}
           SIMULATE_ALERT: ${{ inputs.simulate_alert }}
+          SIMULATE_REVIEW: ${{ inputs.simulate_review }}
         run: |
           if [ "$(date -u +%u)" = "7" ] || [ "${{ inputs.check_wayback }}" = "true" ]; then
             node scraper/index.js --check-wayback
@@ -59,13 +64,17 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add site/data/episodes.json reports/match-report.md
+          git add site/data/episodes.json reports/match-report.md reports/review.json
           if git diff --cached --quiet; then
             echo "No data changes."
           else
             git commit -m "Update episode data"
             git push
           fi
+      - name: Update the Match review issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scraper/review-sync.js
       - name: Alert on problems or lost episodes
         if: always()
         env:

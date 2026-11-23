@@ -18,10 +18,12 @@ import { matchAll } from './match.js';
 import { checkLinks } from './check.js';
 import { classify } from './lib/classify.js';
 import { assessHealth, healthMarkdown } from './health.js';
+import { buildReviewItems } from './review.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'site/data/episodes.json');
 const REPORT = path.join(ROOT, 'reports/match-report.md');
+const REVIEW_JSON = path.join(ROOT, 'reports/review.json');
 const HEALTH_JSON = path.join(ROOT, 'reports/health.json');
 const HEALTH_MD = path.join(ROOT, 'reports/health.md');
 
@@ -184,6 +186,10 @@ async function main() {
     console.log(`Wrote ${path.relative(ROOT, OUT)}`);
   }
   await fs.writeFile(REPORT, md);
+  // Links needing a human decision; the workflow mirrors these into the "Match review" issue.
+  const reviewItems = buildReviewItems(report, unknownHosts, overrides, new Map(out.episodes.map((e) => [e.id, e])), { simulate: process.env.SIMULATE_REVIEW === 'true' });
+  await fs.writeFile(REVIEW_JSON, JSON.stringify({ items: reviewItems }, null, 1) + '\n');
+  console.log(`Review: ${reviewItems.length} item(s) need a decision`);
   // Health files are for this run's alert step only (not committed).
   await fs.writeFile(HEALTH_JSON, JSON.stringify(health, null, 1) + '\n');
   await fs.writeFile(HEALTH_MD, healthMarkdown(health, { runUrl }));

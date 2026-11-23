@@ -64,7 +64,7 @@ export function matchLink(link, { byId, byTitle, episodes, overrides }) {
   if (best && best.sim >= FUZZY_MIN && best.sim - second >= FUZZY_MARGIN) {
     return { ep: best.ep, how: 'fuzzy', sim: best.sim, issue: `fuzzy match "${link.title}" -> "${best.ep.title}" (${best.sim.toFixed(2)})` };
   }
-  return { issue: `no match for "${link.title}"${best ? ` (closest: "${best.ep.title}" ${best.sim.toFixed(2)})` : ''}` };
+  return { issue: `no match for "${link.title}"${best ? ` (closest: "${best.ep.title}" ${best.sim.toFixed(2)})` : ''}`, closest: best && best.sim >= 0.5 ? best.ep.id : null };
 }
 
 /**
@@ -95,10 +95,10 @@ export function matchAll(catalog, links, overrides = {}) {
       byId.set(ep.id, ep);
       const k = normTitle(ep.title);
       byTitle.set(k, [...(byTitle.get(k) ?? []), ep]);
-      report.added.push({ id: ep.id, title: ep.title, url: link.url });
+      report.added.push({ id: ep.id, title: ep.title, url: link.url, source: link.source });
     }
-    if (!ep) { report.unmatched.push({ ...link, reason: r.issue }); continue; }
-    if (r.issue) report.flagged.push({ id: ep.id, url: link.url, reason: r.issue });
+    if (!ep) { report.unmatched.push({ ...link, reason: r.issue, closest: r.closest ?? null }); continue; }
+    if (r.issue) report.flagged.push({ id: ep.id, url: link.url, reason: r.issue, title: link.title, source: link.source });
     if (!ep.links.some((l) => l.url === link.url)) ep.links.push(link);
     report.matched++;
   }
