@@ -54,9 +54,19 @@ After each nightly run, `scraper/health.js` compares the new data with the previ
 
 If anything is wrong, `.github/scripts/alert.sh` opens a GitHub issue labelled `scraper-alert`, or comments on the one already open. It closes the issue once a run is healthy again, listing any episodes that became playable again. A crashed run or a failed deploy also files an alert. GitHub notifies you of the issue by email or in its app, depending on your notification settings. To test the whole path, run the workflow by hand with **Simulate an alert** ticked.
 
-## Fixing matches
+## Fixing matches: the Match review issue
 
-Read `reports/match-report.md` after a run. To fix a link, add it to `config/overrides.json`:
+Links that need a human decision are collected in one GitHub issue labelled `match-review`:
+- links that matched no episode
+- matches made by a guess
+- episodes found in a source but not in Wikipedia's list
+- links on unrecognised websites
+
+The nightly run keeps the issue's list current, adds a comment only when new items appear, and closes it when nothing is left.
+
+**To answer, tick a box** under an item. Each item offers ready-made choices, such as "✅ It's #467 Broken Window" or "🚫 Ignore this link". For anything else, **reply** with the item number and episode number, e.g. `3 is 467`. `ignore 3`, `accept 3` and `undo 3` also work. The **Match review answers** workflow (`.github/workflows/review.yml`) saves each decision to `config/overrides.json`, confirms in the issue and reruns the scraper. It only acts on the repository owner's own ticks and replies.
+
+`config/overrides.json` can also be edited by hand:
 
 ```json
 {
@@ -64,11 +74,12 @@ Read `reports/match-report.md` after a run. To fix a link, add it to `config/ove
     "https://cdn.subsplash.com/…/audio.mp3": "aio-398",
     "https://cdn.subsplash.com/…/combined.mp3": ["aio-438a", "aio-442a"],
     "https://example.com/not-an-episode.mp3": null
-  }
+  },
+  "reviewed": ["https://example.com/fine-as-it-is.mp3"]
 }
 ```
 
-Use `null` to ignore a link and a list to attach one file to several episodes.
+To test the issue end to end, run the deploy workflow by hand with **Add a test item to the Match review issue** ticked. Answering the test item changes nothing.
 
 ## Running locally
 

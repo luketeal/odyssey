@@ -1,9 +1,11 @@
 {
-  "$comment": "Manual fixes for the matcher. links: audio URL -> episode id (e.g. \"aio-398\"), a list of ids for one file holding several episodes, or null to ignore that link. reports/match-report.md lists links that need attention.",
+  "$comment": "Manual decisions for the matcher, usually made by ticking boxes in the 'Match review' GitHub issue. links: audio URL -> episode id (e.g. \"aio-398\"), a list of ids for one file holding several episodes, or null to ignore that link. reviewed: links confirmed as fine as they are.",
   "links": {
     "https://cdn.subsplash.com/audios/FMDDCD/368ee0eb-2558-42f9-bdb2-417dfea8cf45/audio.mp3": [
       "aio-438a",
       "aio-442a"
-    ]
+    ],
+    "https://cdn.subsplash.com/audios/FMDDCD/dcf4d8a3-daab-4928-9179-9b72c7019dc5/audio.mp3": "aio-215",
+    "https://traffic.omny.fm/d/clips/6b62b447-e557-44a9-ae88-af6300da5440/51f96c51-29f2-40a8-b3e0-af95000ecd1e/0033f8c8-649e-47f1-872d-af95001cd6be/audio.mp3": "aio-461"
   }
 }

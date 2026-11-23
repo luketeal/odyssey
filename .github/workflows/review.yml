@@ -1,0 +1,58 @@
+name: Match review answers
+
+# Reacts to the repository owner's answers in the "Match review" issue: ticked boxes (issue edits)
+# and replies (comments). Saves the decision to config/overrides.json, confirms in the issue and
+# reruns the scraper so the list and the site update. Ignores everyone else, including the bot's
+# own edits to the issue.
+on:
+  issues:
+    types: [edited]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  issues: write
+  actions: write
+
+concurrency:
+  group: match-review
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: >-
+      contains(github.event.issue.labels.*.name, 'match-review') &&
+      github.event.sender.login == github.repository_owner &&
+      !github.event.issue.pull_request
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - id: apply
+        name: Read the answer
+        run: node scraper/review-apply.js
+      - name: Save the decision
+        if: steps.apply.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add config/overrides.json
+          git commit -m "Match review: ${{ steps.apply.outputs.summary }} (#${{ github.event.issue.number }})"
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && break; sleep 5; done
+      - name: Confirm in the issue
+        if: steps.apply.outputs.reply == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue comment ${{ github.event.issue.number }} --body-file reports/review-reply.md
+      - name: Rerun the scraper
+        if: steps.apply.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main

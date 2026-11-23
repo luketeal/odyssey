@@ -1,6 +1,6 @@
 # Match report
 
-Generated 2026-11-23T02:29:40.341Z. Fix anything below once in `config/overrides.json`; the fix applies on every future run.
+Generated 2026-11-23T03:41:58.012Z. Fix anything below once in `config/overrides.json`; the fix applies on every future run.
 
 ## Summary
 
@@ -16,9 +16,4 @@ Generated 2026-11-23T02:29:40.341Z. Fix anything below once in `config/overrides
 | focus-legacy | 21 | 106 | 0 |
 | omny | 31 | 0 | 0 |
 | oneplace | 7 | 0 | 0 |
-
-## Matched, but worth a look
-
-- aio-215: code 215 title mismatch: "Here We Come a-Caroling" vs "Caroling, Caroling"
-- aio-461: fuzzy match "BTV: Obedience" -> "B-TV: Obedience" (0.88)
 
