@@ -716,7 +716,6 @@ function removeProgress(ep) {
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') || 'dev';
 let newVersion = null;
 let lastCheck = 0;
-let offeredReload = false;
 const skipVersion = new URL(location.href).searchParams.get('updated'); // a reload already tried this one
 
 async function checkForUpdate() {
@@ -742,14 +741,9 @@ function busy() {
 
 function maybeReload() {
   if (!newVersion || busy()) return;
-  if (store.hasUnsaved()) {
-    // Reloading would lose progress that only lives in memory: offer instead, once.
-    if (!offeredReload) {
-      offeredReload = true;
-      toast('A new version is available. Reloading now would lose unsaved progress.', { label: 'Reload', run: reloadForUpdate });
-    }
-    return;
-  }
+  // Reloading would lose progress that only lives in memory (saving not turned on). Stay on this
+  // version quietly; it updates later once there's nothing to lose (e.g. after saving or a fresh open).
+  if (store.hasUnsaved()) return;
   reloadForUpdate();
 }
 

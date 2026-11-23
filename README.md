@@ -43,7 +43,7 @@ Edit `config/sources.json` to change defaults. Set `"scrape": false` to drop a s
 - If a link fails to load, or doesn't respond within 20 seconds, the player switches to the next source automatically and remembers the failure in that browser for 3 days.
 - A "Playing from" menu lets listeners switch copies on the spot.
 - Progress is saved **per copy**, because broadcast and album versions differ in length. When switching copies mid-episode, the position is converted proportionally.
-- Staying current: each deploy writes `version.json`. When the app returns to the foreground, and every 15 minutes, it compares that with its own version. If a newer one is live, it reloads itself, but only when nothing is playing, no dialog is open and no progress would be lost. It returns to the same tab, scroll position and episode. If there's unsaved progress, it offers a Reload button instead. This matters most for iPhone Home Screen web apps, which are resumed rather than reloaded.
+- Staying current: each deploy writes `version.json`. When the app returns to the foreground, and every 15 minutes, it compares that with its own version. If a newer one is live, it reloads itself, but only when nothing is playing, no dialog is open and no progress would be lost. It returns to the same tab, scroll position and episode. If there's unsaved progress (saving not turned on), it quietly stays on the current version. This matters most for iPhone Home Screen web apps, which are resumed rather than reloaded.
 - If the listener has saved, the app remembers the last episode. Reopening the site shows it paused at the spot where they stopped. Links like `#ep=aio-398` open a specific episode.
 
 ## Fixing matches
