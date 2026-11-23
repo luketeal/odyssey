@@ -243,7 +243,8 @@ function renderContinue() {
   $('#continue-count').textContent = inProgress.length || '';
 
   const list = $('#continue-list');
-  if (!entries.length) {
+  // Some records belong in neither list (e.g. an episode paused at 0:00), so check what's shown.
+  if (!inProgress.length && !finished.length) {
     list.replaceChildren(el('p', { class: 'empty', text: 'Episodes you start will appear here so you can pick up where you left off.' }));
     return;
   }
