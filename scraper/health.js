@@ -87,6 +87,9 @@ export function assessHealth(prev, next, { problems = [], sources = [], simulate
   return { ok, alerts, lost, recovered };
 }
 
+// GitHub turns "#123" into a link to issue/PR 123, so write "Episode 123: Title".
+const epName = (e) => `${e.code ? `Episode ${e.code}: ` : ''}${e.title}`;
+
 /** Markdown for the GitHub issue body / comment. */
 export function healthMarkdown(h, { runUrl = null, date = new Date().toISOString().slice(0, 10) } = {}) {
   const lines = [];
@@ -98,12 +101,12 @@ export function healthMarkdown(h, { runUrl = null, date = new Date().toISOString
     if (h.lost.length) {
       lines.push('', `**Episodes no longer playable (${h.lost.length})**: every link failed, including any archive copy.`);
       for (const e of h.lost) {
-        lines.push(`- ${e.code ? `#${e.code} ` : ''}${e.title}`);
+        lines.push(`- ${epName(e)}`);
         for (const l of e.links) lines.push(`  - ${l.source}: ${l.why}${l.since ? ` (since ${l.since})` : ''} ${l.url}`);
       }
     }
   }
-  if (h.recovered.length) lines.push('', `**Playable again (${h.recovered.length})**`, ...h.recovered.map((e) => `- ${e.code ? `#${e.code} ` : ''}${e.title}`));
+  if (h.recovered.length) lines.push('', `**Playable again (${h.recovered.length})**`, ...h.recovered.map((e) => `- ${epName(e)}`));
   if (runUrl) lines.push('', `Run: ${runUrl}`);
   return lines.join('\n') + '\n';
 }

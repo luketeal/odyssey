@@ -18,7 +18,8 @@ test('items, choices and numbering; decided links are left out', () => {
   const items = buildReviewItems(report, ['u5'], { links: { u2: null }, reviewed: ['u5'] }, byId);
   assert.deepEqual(items.map((i) => [i.n, i.url, i.kind]), [[1, 'u1', 'unmatched'], [2, 'u3', 'guess'], [3, 'u4', 'added']]);
   assert.deepEqual(items[0].choices.map((c) => c.do), ['match', 'ignore']);
-  assert.match(items[0].choices[0].label, /#467 Broken Window/);
+  assert.match(items[0].choices[0].label, /Episode 467: Broken Window/);
+  assert.doesNotMatch(renderIssueBody(items), /#\d/, 'no #123 that GitHub would turn into an issue link');
 });
 
 test('rendered body round-trips: items and ticked boxes are read back exactly', () => {

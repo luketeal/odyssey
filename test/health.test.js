@@ -17,7 +17,8 @@ test('an episode that loses every link is reported, with reasons', () => {
   assert.equal(h.ok, false);
   assert.equal(h.lost.length, 1);
   assert.deepEqual(h.lost[0].links[0], { source: 'subsplash', url: 'aio-1-subsplash', why: 'HTTP 404', since: '2026-11-24' });
-  assert.match(healthMarkdown(h), /#1 Episode aio-1[\s\S]*HTTP 404/);
+  assert.match(healthMarkdown(h), /Episode 1: Episode aio-1[\s\S]*HTTP 404/);
+  assert.doesNotMatch(healthMarkdown(h), /#\d/);
 });
 
 test('still loadable from the Internet Archive: not lost', () => {
