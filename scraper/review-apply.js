@@ -6,14 +6,14 @@
 //   reply=true    there is a reply to post
 
 import fs from 'node:fs/promises';
-import { checkedActions, allActions, itemsFromBody, parseReply, episodeIdFrom, applyDecision } from './review.js';
+import { checkedActions, allActions, itemsFromBody, parseReply, episodeIdFrom, applyDecision, epLabel } from './review.js';
 
 const OVERRIDES = 'config/overrides.json';
 const event = JSON.parse(await fs.readFile(process.env.GITHUB_EVENT_PATH, 'utf8'));
 const name = process.env.GITHUB_EVENT_NAME;
 const data = JSON.parse(await fs.readFile('site/data/episodes.json', 'utf8'));
 const byId = new Map(data.episodes.map((e) => [e.id, e]));
-const label = (id) => { const e = byId.get(id); return e ? `${e.code ? `#${e.code} ` : ''}${e.title}` : id; };
+const label = (id) => epLabel(byId.get(id)) || id;
 
 let overrides = JSON.parse(await fs.readFile(OVERRIDES, 'utf8'));
 const body = event.issue?.body ?? '';

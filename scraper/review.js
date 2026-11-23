@@ -10,7 +10,8 @@ import { normCode, codeToId } from './lib/normalize.js';
 const SOURCE_NAMES = { subsplash: 'Subsplash', omny: 'Official Podcast', oneplace: 'OnePlace', 'focus-legacy': 'Focus on the Family (older)', wayback: 'Internet Archive' };
 const enc = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
 const dec = (s) => { try { return JSON.parse(Buffer.from(s, 'base64url').toString('utf8')); } catch { return null; } };
-const epLabel = (ep) => (ep ? `${ep.code ? `#${ep.code} ` : ''}${ep.title}` : '');
+// GitHub turns "#123" into a link to issue/PR 123, so issues say "Episode 123: Title" instead.
+export const epLabel = (ep) => (ep ? `${ep.code ? `Episode ${ep.code}: ` : ''}${ep.title}` : '');
 
 /**
  * Build the list of items needing a decision.
