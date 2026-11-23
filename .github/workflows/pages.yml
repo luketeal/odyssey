@@ -12,6 +12,10 @@ on:
         description: 'Also re-check Internet Archive links'
         type: boolean
         default: false
+      simulate_alert:
+        description: 'Simulate an alert (tests the alert issue end to end)'
+        type: boolean
+        default: false
       force_new_version:
         description: 'Force a new app version (open apps reload even if nothing changed; for testing)'
         type: boolean
@@ -21,6 +25,7 @@ permissions:
   contents: write
   pages: write
   id-token: write
+  issues: write # alerts: open/update/close the "scraper-alert" issue
 
 concurrency:
   group: pages
@@ -43,6 +48,7 @@ jobs:
         env:
           # Identifies the scraper to the sites it reads (Wikimedia asks for contact info).
           SCRAPER_CONTACT: ${{ github.server_url }}/${{ github.repository }}
+          SIMULATE_ALERT: ${{ inputs.simulate_alert }}
         run: |
           if [ "$(date -u +%u)" = "7" ] || [ "${{ inputs.check_wayback }}" = "true" ]; then
             node scraper/index.js --check-wayback
@@ -60,6 +66,16 @@ jobs:
             git commit -m "Update episode data"
             git push
           fi
+      - name: Alert on problems or lost episodes
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash .github/scripts/alert.sh health
+      - name: Alert if this job failed
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash .github/scripts/alert.sh failure scrape
 
   deploy:
     needs: scrape
@@ -95,3 +111,8 @@ jobs:
         uses: actions/deploy-pages@v4
         with:
           artifact_name: github-pages-${{ github.run_attempt }}
+      - name: Alert if the deploy failed
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash .github/scripts/alert.sh failure deploy

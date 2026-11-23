@@ -17,10 +17,13 @@ import * as oneplace from './sources/oneplace.js';
 import { matchAll } from './match.js';
 import { checkLinks } from './check.js';
 import { classify } from './lib/classify.js';
+import { assessHealth, healthMarkdown } from './health.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'site/data/episodes.json');
 const REPORT = path.join(ROOT, 'reports/match-report.md');
+const HEALTH_JSON = path.join(ROOT, 'reports/health.json');
+const HEALTH_MD = path.join(ROOT, 'reports/health.md');
 
 const args = new Set(process.argv.slice(2));
 const today = new Date().toISOString().slice(0, 10);
@@ -166,6 +169,9 @@ async function main() {
 
   // Report (written before the underscore fields are stripped)
   const md = buildReport(out, report, problems, unknownHosts);
+  // Health check (needs the `_why` reasons, so it runs before they are stripped).
+  const health = assessHealth(prev, out, { problems, sources: config.sources, simulate: process.env.SIMULATE_ALERT === 'true' });
+  const runUrl = process.env.GITHUB_RUN_ID ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}` : null;
   for (const ep of out.episodes) for (const s of ep.sources) { delete s._why; delete s._note; }
 
   await fs.mkdir(path.dirname(OUT), { recursive: true });
@@ -178,6 +184,10 @@ async function main() {
     console.log(`Wrote ${path.relative(ROOT, OUT)}`);
   }
   await fs.writeFile(REPORT, md);
+  // Health files are for this run's alert step only (not committed).
+  await fs.writeFile(HEALTH_JSON, JSON.stringify(health, null, 1) + '\n');
+  await fs.writeFile(HEALTH_MD, healthMarkdown(health, { runUrl }));
+  console.log(health.ok ? 'Health: OK' : `Health: ${health.alerts.length} problem(s), ${health.lost.length} lost episode(s)`);
   console.log(`Wrote ${path.relative(ROOT, REPORT)}`);
   if (problems.length) console.warn('Problems:\n  ' + problems.join('\n  '));
 }

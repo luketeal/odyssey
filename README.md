@@ -46,6 +46,14 @@ Edit `config/sources.json` to change defaults. Set `"scrape": false` to drop a s
 - Staying current: each deploy writes `version.json`. When the app returns to the foreground, and every 15 minutes, it compares that with its own version. If a newer one is live, it reloads itself, but only when nothing is playing, no dialog is open and no progress would be lost. It returns to the same tab, scroll position and episode. If there's unsaved progress (saving not turned on), it quietly stays on the current version. This matters most for iPhone Home Screen web apps, which are resumed rather than reloaded.
 - If the listener has saved, the app remembers the last episode. Reopening the site shows it paused at the spot where they stopped. Links like `#ep=aio-398` open a specific episode.
 
+## Alerts
+
+After each nightly run, `scraper/health.js` compares the new data with the previous run:
+- **Problems:** a source failed, playable episodes or one source's working links dropped sharply, the catalog shrank, or no podcast extras were found.
+- **Lost episodes:** an episode that was playable and now has **no working link anywhere**, including the Internet Archive. Losing one of several copies doesn't count, and neither do expiring OnePlace broadcasts or sources switched off on purpose. Each lost episode is listed with the links that died and why.
+
+If anything is wrong, `.github/scripts/alert.sh` opens a GitHub issue labelled `scraper-alert`, or comments on the one already open. It closes the issue once a run is healthy again, listing any episodes that became playable again. A crashed run or a failed deploy also files an alert. GitHub notifies you of the issue by email or in its app, depending on your notification settings. To test the whole path, run the workflow by hand with **Simulate an alert** ticked.
+
 ## Fixing matches
 
 Read `reports/match-report.md` after a run. To fix a link, add it to `config/overrides.json`:
