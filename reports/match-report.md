@@ -1,13 +1,13 @@
 # Match report
 
-Generated 2026-11-24T18:57:29.822Z. Fix anything below once in `config/overrides.json`; the fix applies on every future run.
+Generated 2026-11-25T18:01:27.575Z. Fix anything below once in `config/overrides.json`; the fix applies on every future run.
 
 ## Summary
 
 - Catalog episodes: **1086**
 - Episodes with at least one link that is not known to be broken: **645**
 - Episodes whose only links are Internet Archive copies (hidden unless a listener turns that source on): **139**
-- Podcast extras: **467** (0 with broken links)
+- Podcast extras: **468** (0 with broken links)
 
 | Source | OK | Broken | Not yet checked |
 |---|---|---|---|
@@ -15,5 +15,5 @@ Generated 2026-11-24T18:57:29.822Z. Fix anything below once in `config/overrides
 | wayback | 178 | 1 | 0 |
 | focus-legacy | 21 | 106 | 0 |
 | omny | 31 | 0 | 0 |
-| oneplace | 9 | 0 | 0 |
+| oneplace | 10 | 0 | 0 |
 
