@@ -51,6 +51,14 @@ test('search matches number, title and album', () => {
   assert.ok(!matchesQuery(ep, 'green ring'));
 });
 
+test('readable dates inside labels', async () => {
+  const { readableDates } = await import('../site/js/logic.js');
+  assert.equal(readableDates('Aired 2026-11-20'), 'Aired Nov 20, 2026');
+  assert.equal(readableDates('2026-01-05'), 'Jan 5, 2026');
+  assert.equal(readableDates('2021 airing'), '2021 airing');
+  assert.equal(readableDates(null), '');
+});
+
 test('source impact: totals, only-here, would-add follow the current switches', async () => {
   const { sourceImpact } = await import('../site/js/logic.js');
   const ids = ['subsplash', 'omny', 'wayback'];

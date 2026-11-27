@@ -1,5 +1,5 @@
 {
-  "$comment": "scrape=false stops collecting from a source (its links are removed on the next run). defaultEnabled controls whether the player uses it before a listener changes their settings. Order here is the default playback priority.",
+  "$comment": "scrape=false stops collecting from a source (its links are removed on the next run). defaultEnabled controls whether the player uses it before a listener changes their settings. Order here is the default playback priority. home: the source's official page, linked from Settings.",
   "sources": [
     {
       "id": "subsplash",
@@ -8,7 +8,11 @@
       "official": true,
       "scrape": true,
       "defaultEnabled": true,
-      "check": "daily"
+      "check": "daily",
+      "home": {
+        "url": "https://www.adventuresinodyssey.com/",
+        "label": "adventuresinodyssey.com"
+      }
     },
     {
       "id": "omny",
@@ -17,7 +21,11 @@
       "official": true,
       "scrape": true,
       "defaultEnabled": true,
-      "check": "daily"
+      "check": "daily",
+      "home": {
+        "url": "https://omny.fm/shows/the-official-adventures-in-odyssey-podcast",
+        "label": "The Official Adventures in Odyssey Podcast"
+      }
     },
     {
       "id": "oneplace",
@@ -27,7 +35,11 @@
       "scrape": true,
       "defaultEnabled": true,
       "check": "daily",
-      "ephemeral": true
+      "ephemeral": true,
+      "home": {
+        "url": "https://www.oneplace.com/ministries/adventures-in-odyssey/",
+        "label": "Adventures in Odyssey on OnePlace"
+      }
     },
     {
       "id": "focus-legacy",
@@ -36,7 +48,11 @@
       "official": true,
       "scrape": true,
       "defaultEnabled": true,
-      "check": "daily"
+      "check": "daily",
+      "home": {
+        "url": "https://www.focusonthefamily.com/",
+        "label": "focusonthefamily.com"
+      }
     },
     {
       "id": "wayback",
@@ -45,7 +61,11 @@
       "official": false,
       "scrape": true,
       "defaultEnabled": false,
-      "check": "weekly"
+      "check": "weekly",
+      "home": {
+        "url": "https://web.archive.org/",
+        "label": "The Internet Archive Wayback Machine"
+      }
     }
   ],
   "excludedHosts": [

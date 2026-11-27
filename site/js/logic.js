@@ -128,3 +128,9 @@ export function sourceImpact(items, prefs, sourceIds, localBroken = {}) {
   }
   return { playable: items.filter((ep) => playableWith(ep, now)).length, bySource };
 }
+
+/** "2026-11-20" -> "Nov 20, 2026" (also inside text like "Aired 2026-11-20"). */
+export function readableDates(text) {
+  return String(text ?? '').replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, (_, y, m, d) =>
+    new Date(Number(y), Number(m) - 1, Number(d)).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }));
+}

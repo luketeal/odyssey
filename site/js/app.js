@@ -1,7 +1,7 @@
 import { store } from './store.js?v=dev';
 import {
   reconcilePrefs, candidates, pickSource, resumePoint, recordPosition,
-  fraction, formatTime, matchesQuery, sourceImpact,
+  fraction, formatTime, matchesQuery, sourceImpact, readableDates,
 } from './logic.js?v=dev';
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -224,7 +224,8 @@ function epRow(ep, prog, { removable = false } = {}) {
   return el('div', { class: `ep${isCurrent ? ' current' : ''}${can ? '' : ' unavailable'}${removable ? ' removable' : ''}`, 'data-id': ep.id, 'data-removable': removable || null, id: ep.isExtra || removable ? null : ep.id },
     btn,
     el('div', { class: 'ep-main' },
-      el('div', { class: 'ep-title' }, ep.code ? el('span', { class: 'ep-num', text: `#${ep.code}` }) : null, ep.title),
+      el('div', { class: 'ep-title' }, ep.code ? el('span', { class: 'ep-num', text: `#${ep.code}` }) : null, ep.title,
+        ep.sources?.length ? infoButton(ep) : null),
       sub.length ? el('div', { class: 'ep-sub' }, sub.map((s) => el('span', { text: s }))) : null,
       ep.isExtra && ep.description ? el('div', { class: 'extra-desc', text: ep.description }) : null),
     el('div', { class: 'ep-side' }, side, onlyArchive && can ? el('span', { class: 'badge archive', text: 'Archive' }) : null),
@@ -332,7 +333,7 @@ function renderSourceSelect() {
     const notes = [];
     if (!state.prefs.enabled[s.source]) notes.push('off in settings');
     if (broken[s.url]) notes.push('failed here recently');
-    const text = `From: ${sourceName(s.source)}${s.label ? ` (${s.label})` : ''}${notes.length ? ` [${notes.join(', ')}]` : ''}`;
+    const text = `From: ${sourceName(s.source)}${s.label ? ` (${readableDates(s.label)})` : ''}${notes.length ? ` [${notes.join(', ')}]` : ''}`;
     return el('option', { value: s.url, selected: s.url === source.url, text });
   }));
   sel.disabled = sources.length < 2;
@@ -636,6 +637,21 @@ dlg.addEventListener('close', () => {
   if (state.current) renderSourceSelect();
 });
 
+/** Source name with a ↗ to its official page; the icon stays on the same line as the last word. */
+function sourceName_(s) {
+  const words = s.name.split(' ');
+  const last = words.pop();
+  let link = null;
+  if (s.home?.url) {
+    link = el('a', { class: 'home-link', href: s.home.url, target: '_blank', rel: 'noopener', 'aria-label': `Visit ${s.home.label}`, title: s.home.label });
+    link.innerHTML = ICON_OPEN;
+  }
+  return el('div', { class: 'name' }, words.length ? `${words.join(' ')} ` : null,
+    el('span', { class: 'nowrap' }, last, link),
+    s.official ? null : ' ', // a plain space (not a margin) so a wrapped tag lines up with the name
+    s.official ? null : el('span', { class: 'tag', text: 'Unofficial copy' }));
+}
+
 function renderSourcePrefs() {
   const ol = $('#source-prefs');
   const order = state.prefs.order;
@@ -673,7 +689,7 @@ function renderSourcePrefs() {
     return el('li', {},
       cb,
       el('div', {},
-        el('div', { class: 'name' }, s.name, s.official ? null : el('span', { class: 'tag', text: 'Unofficial copy' })),
+        sourceName_(s),
         el('div', { class: 'desc', text: s.description }),
         el('div', { class: 'counts' }, parts.filter(Boolean))),
       el('div', { class: 'order-btns' },
@@ -701,6 +717,68 @@ $('#clear-history').addEventListener('click', () => {
   store.clearAllProgress();
   toast('Listening history cleared.');
 });
+
+// ---------- sources popup ----------
+// Every place an episode (or extra) can be played from, with a link to each audio file.
+// Suspected broken links are hidden behind a toggle inside the popup.
+
+const ICON_INFO = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2zm0-8h-2V7h2z"/></svg>';
+const ICON_OPEN = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M14 3h7v7h-2V6.4l-9.3 9.3-1.4-1.4L17.6 5H14zM5 5h6v2H7v10h10v-4h2v6H5z"/></svg>';
+const sourcesDlg = $('#sources-dlg');
+let sourcesItem = null;
+let sourcesShowBroken = false;
+
+function infoButton(item) {
+  const b = el('button', { type: 'button', class: 'info-btn', 'aria-label': `Sources for ${item.title}`, title: 'Sources',
+    onclick: (e) => { e.stopPropagation(); openSources(item); } });
+  b.innerHTML = ICON_INFO;
+  return b;
+}
+
+function openSources(item) {
+  sourcesItem = item;
+  sourcesShowBroken = false; // always start with suspected broken links hidden
+  renderSources();
+  if (!sourcesDlg.open) sourcesDlg.showModal();
+}
+
+function renderSources() {
+  const item = sourcesItem;
+  const failedHere = localBroken();
+  const order = state.prefs.order;
+  const isBad = (s) => s.status === 'broken' || Boolean(failedHere[s.url]);
+  const all = [...item.sources].sort((a, b) => order.indexOf(a.source) - order.indexOf(b.source));
+  const bad = all.filter(isBad);
+  const shown = sourcesShowBroken ? all : all.filter((s) => !isBad(s));
+
+  const card = (s) => {
+    const info = state.sourceInfo.get(s.source);
+    const status = s.status === 'broken' ? `✕ Not working${s.since ? ` since ${readableDates(s.since)}` : ''}`
+      : failedHere[s.url] ? '✕ Failed in this browser recently'
+      : s.status === 'unchecked' ? '• Not checked yet' : '✓ Working';
+    const open = el('a', { class: 'btn src-open', href: s.url, target: '_blank', rel: 'noopener' }, 'Open audio file ');
+    open.insertAdjacentHTML('beforeend', ICON_OPEN);
+    return el('li', { class: isBad(s) ? 'bad' : null },
+      el('div', { class: 'src-name', text: info?.name ?? s.source }),
+      el('div', { class: `src-status ${isBad(s) ? 'bad' : s.status === 'unchecked' ? 'unchecked' : 'ok'}`, text: status }),
+      el('div', { class: 'src-meta' },
+        s.label ? el('span', { text: readableDates(s.label) }) : null,
+        info && !info.official ? el('span', { class: 'tag', text: 'Unofficial copy' }) : null,
+        !state.prefs.enabled[s.source] ? el('span', { class: 'tag', text: 'Off in Settings' }) : null),
+      open);
+  };
+
+  const n = bad.length;
+  $('#sources-title').textContent = item.code ? `#${item.code} ${item.title}` : item.title;
+  $('#sources-list').replaceChildren(...(shown.length ? shown.map(card)
+    : [el('li', { class: 'empty-src', text: 'No working links right now.' })]));
+  const toggle = $('#sources-toggle');
+  toggle.hidden = n === 0;
+  toggle.textContent = sourcesShowBroken ? `Hide suspected broken link${n === 1 ? '' : 's'}` : `Show ${n} suspected broken link${n === 1 ? '' : 's'}`;
+}
+
+$('#sources-toggle').addEventListener('click', () => { sourcesShowBroken = !sourcesShowBroken; renderSources(); });
+$('#np-info').addEventListener('click', () => { if (state.current) openSources(state.current.item); });
 
 // ---------- toast ----------
 

@@ -198,7 +198,7 @@ dialog::backdrop { background: rgb(0 0 0 / 0.45); }
 .source-prefs .counts { font-size: 0.82rem; margin-top: 4px; font-variant-numeric: tabular-nums; }
 .only.lose { color: var(--danger); font-weight: 600; }
 .only.gain { color: var(--accent); font-weight: 600; }
-.source-prefs .tag { font-size: 0.72rem; font-weight: 600; color: var(--muted); margin-left: 6px; }
+.source-prefs .tag { font-size: 0.72rem; font-weight: 600; color: var(--muted); white-space: nowrap; }
 .source-prefs input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); }
 .order-btns { display: flex; gap: 2px; }
 .order-btns button { background: var(--surface-2); border: 0; border-radius: 6px; width: 30px; height: 30px; cursor: pointer; }
@@ -226,3 +226,32 @@ dialog::backdrop { background: rgb(0 0 0 / 0.45); }
   .controls { justify-content: center; position: relative; }
   .ctl.rate { position: absolute; right: 0; top: 50%; transform: translateY(-50%); }
 }
+
+/* Sources: ⓘ buttons and popup */
+.info-btn { background: none; border: 0; color: var(--muted); cursor: pointer; line-height: 0; border-radius: 999px;
+  padding: 7px; margin: -7px -7px -7px -2px; vertical-align: middle; } /* 32px tap area around an 18px icon */
+.info-btn:hover { color: var(--text); background: var(--surface-2); }
+.info-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 0; }
+.np-title-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.np-title-row .np-title { min-width: 0; }
+.np-title-row .info-btn { flex: none; margin: -7px 0; }
+.src-list { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-direction: column; gap: 8px; }
+.src-list li { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.src-list li.bad { opacity: 0.8; }
+.src-list .empty-src { color: var(--muted); }
+.src-name { font-weight: 600; }
+.src-status { font-size: 0.82rem; margin-top: 1px; }
+.src-status.ok { color: var(--accent); }
+.src-status.bad { color: var(--danger); }
+.src-status.unchecked { color: var(--muted); }
+.src-meta { color: var(--muted); font-size: 0.82rem; display: flex; flex-wrap: wrap; gap: 2px 10px; margin-top: 2px; }
+.src-meta:empty { display: none; }
+.src-meta .tag { font-weight: 600; }
+.src-open { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; text-decoration: none; color: var(--text); font-size: 0.85rem; }
+.src-toggle { margin-top: 8px; padding: 8px 4px; text-decoration: underline; }
+
+/* Settings: ↗ link to each source's official page (32px tap area around a 16px icon) */
+.source-prefs .nowrap { white-space: nowrap; }
+.home-link { display: inline-flex; vertical-align: middle; color: var(--muted); padding: 8px; margin: -8px -6px -8px -2px; border-radius: 999px; line-height: 0; }
+.home-link:hover { color: var(--text); background: var(--surface-2); }
+.home-link:focus-visible { outline: 2px solid var(--gold); outline-offset: 0; }
