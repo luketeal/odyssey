@@ -255,3 +255,17 @@ dialog::backdrop { background: rgb(0 0 0 / 0.45); }
 .home-link { display: inline-flex; vertical-align: middle; color: var(--muted); padding: 8px; margin: -8px -6px -8px -2px; border-radius: 999px; line-height: 0; }
 .home-link:hover { color: var(--text); background: var(--surface-2); }
 .home-link:focus-visible { outline: 2px solid var(--gold); outline-offset: 0; }
+
+/* Player: minimize / close */
+.np-spacer { flex: 1; }
+.player-btn { flex: none; margin: -6px -4px; }
+.player-mini { display: none; align-items: center; gap: 8px; padding-top: 6px; padding-bottom: 6px; }
+.player.minimized .player-inner { display: none; }
+.player.minimized .player-mini { display: flex; }
+.mini-play { padding: 8px; }
+.mini-title { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 8px; background: none; border: 0; padding: 6px 0; text-align: left; cursor: pointer; color: var(--text); }
+.mini-name { font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.mini-time { flex: none; color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.playing .mini-play .i-play { display: none; }
+.playing .mini-play .i-pause { display: block; }
+.mini-play .i-pause { display: none; }
