@@ -307,8 +307,11 @@ function playItem(item, { source, autoplay = true, silentFallback = false } = {}
 
   player.hidden = false;
   player.classList.add('loading');
-  $('#np-title').textContent = item.code ? `#${item.code} ${item.title}` : item.title;
-  $('#mini-name').textContent = $('#np-title').textContent;
+  const title = item.code ? `#${item.code} ${item.title}` : item.title;
+  setTicker($('#np-title'), title);
+  // The minimized bar has room for more, since long text scrolls: album (or date for an extra).
+  const extra = item.isExtra && item.date ? readableDates(item.date) : (item.albums ?? []).find((a) => a.startsWith('#')) ?? item.albums?.[0];
+  setTicker($('#mini-name'), extra ? `${title} · ${extra}` : title);
   renderSourceSelect();
   $('#rate').textContent = `${audio.playbackRate}×`;
   setPlayerHeight();
@@ -353,11 +356,9 @@ audio.addEventListener('loadedmetadata', () => {
   const { time, approximate } = resumePoint(prog, cur.source.url, audio.duration);
   if (time > 0 && time < audio.duration - 5) {
     audio.currentTime = time;
-    // Only mention it when playback is actually starting, not when quietly restoring a paused player.
-    if (pendingResume.autoplay) {
-      if (approximate) toast(`This copy is a different length, so it resumed at about ${formatTime(time)}.`);
-      else if (!pendingResume.silentFallback) toast(`Resuming at ${formatTime(time)}`);
-    }
+    // The time display shows where playback resumed. Only a jump to a different-length copy needs
+    // explaining, and only when playback is actually starting.
+    if (pendingResume.autoplay && approximate) toast(`This copy is a different length, so it resumed at about ${formatTime(time)}.`);
   }
   if (pendingResume.autoplay) audio.play().catch(() => {});
   pendingResume = null;
@@ -745,6 +746,37 @@ $('#clear-history').addEventListener('click', () => {
   store.clearAllProgress();
   toast('Listening history cleared.');
 });
+
+// ---------- ticker for text that doesn't fit ----------
+// Overflowing text pauses, slides left to reveal the rest, pauses, and slides back. Text that fits
+// doesn't move. With "reduce motion" on, the CSS falls back to a plain "…" cut-off.
+
+const tickerWatch = new ResizeObserver((entries) => entries.forEach((e) => measureTicker(e.target)));
+
+function setTicker(box, text) {
+  let inner = box.querySelector(':scope > .ticker-text');
+  if (!inner) {
+    box.classList.add('ticker');
+    inner = el('span', { class: 'ticker-text' });
+    box.replaceChildren(inner);
+    tickerWatch.observe(box); // re-measure on resize and when a hidden bar becomes visible
+  }
+  inner.textContent = text;
+  box.title = text;
+  measureTicker(box);
+}
+
+function measureTicker(box) {
+  const inner = box.querySelector(':scope > .ticker-text');
+  if (!inner || !box.clientWidth) return; // hidden: measured again once visible
+  const overflow = inner.scrollWidth - box.clientWidth;
+  const scrolling = overflow > 2;
+  box.classList.toggle('scrolling', scrolling);
+  if (scrolling) {
+    box.style.setProperty('--ticker-shift', `-${overflow + 8}px`);
+    box.style.setProperty('--ticker-time', `${Math.max(6, 3 + overflow / 25).toFixed(1)}s`); // ~25px a second, plus pauses
+  }
+}
 
 // ---------- minimize / close the player ----------
 

@@ -150,7 +150,7 @@ h1 { font-size: 1.15rem; margin: 0; letter-spacing: -0.01em; }
 }
 .player-inner { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "np controls" "seek seek"; gap: 6px 12px; padding-top: 10px; padding-bottom: 10px; align-items: center; }
 .np { grid-area: np; min-width: 0; }
-.np-title { font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.np-title { font-weight: 650; }
 .source-select {
   margin-top: 2px; max-width: 100%; border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px;
   padding: 2px 6px; font-size: 0.8rem; color: var(--muted);
@@ -269,3 +269,14 @@ dialog::backdrop { background: rgb(0 0 0 / 0.45); }
 .playing .mini-play .i-play { display: none; }
 .playing .mini-play .i-pause { display: block; }
 .mini-play .i-pause { display: none; }
+
+/* Ticker: scroll text that doesn't fit, back and forth with pauses at each end */
+.ticker { overflow: hidden; white-space: nowrap; min-width: 0; }
+.ticker-text { display: inline-block; }
+.ticker.scrolling { -webkit-mask-image: linear-gradient(90deg, #000 92%, transparent); mask-image: linear-gradient(90deg, #000 92%, transparent); }
+.ticker.scrolling .ticker-text { animation: ticker var(--ticker-time, 8s) ease-in-out infinite alternate; }
+@keyframes ticker { 0%, 18% { transform: translateX(0); } 82%, 100% { transform: translateX(var(--ticker-shift, 0)); } }
+@media (prefers-reduced-motion: reduce) {
+  .ticker.scrolling, .mini-name.ticker.scrolling { -webkit-mask-image: none; mask-image: none; text-overflow: ellipsis; }
+  .ticker.scrolling .ticker-text { animation: none; display: inline; }
+}
