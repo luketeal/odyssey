@@ -536,7 +536,7 @@ for (const [name, cfg] of Object.entries(LISTS)) {
 // ---------- settings ----------
 
 const dlg = $('#settings');
-$('#settings-btn').addEventListener('click', () => { renderSourcePrefs(); renderSaveSettings(); dlg.showModal(); });
+$('#settings-btn').addEventListener('click', () => { renderSourcePrefs(); renderSaveSettings(); renderRetry(); dlg.showModal(); });
 
 // ---------- saving (off by default) ----------
 
@@ -591,6 +591,7 @@ $('#save-btn').addEventListener('click', () => {
     // Autosaving: open Settings at the saving options instead of the save prompt.
     renderSourcePrefs();
     renderSaveSettings();
+    renderRetry();
     dlg.showModal();
     $('#autosave-toggle').closest('label').scrollIntoView({ block: 'center' });
     return;
@@ -681,7 +682,20 @@ function renderSourcePrefs() {
   }));
 }
 
-$('#reset-broken').addEventListener('click', () => { store.clearBroken(); toast('Links will be retried.'); });
+function renderRetry() {
+  const n = Object.keys(localBroken()).length;
+  const btn = $('#reset-broken');
+  btn.hidden = n === 0; // nothing has failed in this browser: nothing to retry
+  btn.textContent = `Retry ${n} link${n === 1 ? '' : 's'} that failed here`;
+}
+
+$('#reset-broken').addEventListener('click', () => {
+  const n = Object.keys(localBroken()).length;
+  store.clearBroken();
+  toast(`${n} link${n === 1 ? '' : 's'} will be tried again.`);
+  renderRetry();
+  renderSourcePrefs(); // those links count again
+});
 $('#clear-history').addEventListener('click', () => {
   if (!confirm('Clear all listening progress saved in this browser?')) return;
   store.clearAllProgress();
@@ -693,6 +707,10 @@ $('#clear-history').addEventListener('click', () => {
 let toastTimer;
 function toast(msg, action) {
   const t = $('#toast');
+  // An open dialog sits on the browser's top layer, above everything else on the page, so show
+  // the message inside it; otherwise it would appear hidden behind Settings.
+  const host = document.querySelector('dialog[open]') ?? document.body;
+  if (t.parentElement !== host) host.append(t);
   t.replaceChildren(el('span', { text: msg }));
   if (action) {
     t.append(el('button', { type: 'button', class: 'toast-action', text: action.label, onclick: () => {
