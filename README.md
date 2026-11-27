@@ -42,6 +42,8 @@ Edit `config/sources.json` to change defaults. Set `"scrape": false` to drop a s
 - Listeners can turn sources on or off and reorder them in **Settings**. The player uses the highest-priority source that's on and not broken.
 - If a link fails to load, or doesn't respond within 20 seconds, the player switches to the next source automatically and remembers the failure in that browser for 3 days.
 - A "Playing from" menu lets listeners switch copies on the spot.
+- An ⓘ next to every episode and extra title (in the list and in the player) opens its **Sources**. Each place it can be played from is shown with its status and an **Open audio file ↗** link. Suspected broken links are hidden behind a "Show N suspected broken links" toggle in that popup.
+- In Settings, each source has a ↗ next to its name linking to its official home, configured as `home` in `config/sources.json`.
 - Progress is saved **per copy**, because broadcast and album versions differ in length. When switching copies mid-episode, the position is converted proportionally.
 - Staying current: each deploy writes `version.json`. When the app returns to the foreground, and every 15 minutes, it compares that with its own version. If a newer one is live, it reloads itself, but only when nothing is playing, no dialog is open and no progress would be lost. It returns to the same tab, scroll position and episode. If there's unsaved progress (saving not turned on), it quietly stays on the current version. This matters most for iPhone Home Screen web apps, which are resumed rather than reloaded.
 - If the listener has saved, the app remembers the last episode. Reopening the site shows it paused at the spot where they stopped. Links like `#ep=aio-398` open a specific episode.

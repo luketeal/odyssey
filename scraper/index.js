@@ -151,7 +151,7 @@ async function main() {
   const out = {
     generatedAt: new Date().toISOString(),
     catalogSource: wikipedia.WIKI_PAGE,
-    sources: config.sources.filter((s) => s.scrape).map(({ id, name, description, official, defaultEnabled }) => ({ id, name, description, official, defaultEnabled })),
+    sources: config.sources.filter((s) => s.scrape).map(({ id, name, description, official, defaultEnabled, home }) => ({ id, name, description, official, defaultEnabled, home: home ?? null })),
     episodes: episodes.map((ep) => {
       const sources = ep.links
         .map((l) => {
