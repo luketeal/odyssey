@@ -100,3 +100,31 @@ export function matchesQuery(ep, q) {
   const hay = searchKey(`${ep.code ?? ''} #${ep.code ?? ''} ${ep.title} ${(ep.albums ?? []).join(' ')} ${ep.year ?? ''} ${ep.date ?? ''} ${ep.description ?? ''}`);
   return searchKey(q).split(' ').every((w) => hay.includes(w));
 }
+
+/**
+ * What each source contributes, given the listener's current switches (same rules as the player).
+ * @param items  episodes or extras ({ sources: [{ source, url, status }] })
+ * @returns {{ playable: number, bySource: { [id]: { total, onlyHere, wouldAdd } } }}
+ *   total     items with a usable link from this source
+ *   onlyHere  (source on)  items that only this source makes playable: turning it off hides them
+ *   wouldAdd  (source off) items not playable now that this source would make playable
+ */
+export function sourceImpact(items, prefs, sourceIds, localBroken = {}) {
+  const usable = (s) => s.status !== 'broken' && !localBroken[s.url];
+  const playableWith = (ep, enabled) => ep.sources.some((s) => enabled[s.source] && usable(s));
+  const now = prefs.enabled;
+  const bySource = {};
+  for (const id of sourceIds) {
+    const flipped = { ...now, [id]: !now[id] };
+    let total = 0, onlyHere = 0, wouldAdd = 0;
+    for (const ep of items) {
+      if (ep.sources.some((s) => s.source === id && usable(s))) total++;
+      const before = playableWith(ep, now);
+      const after = playableWith(ep, flipped);
+      if (now[id] && before && !after) onlyHere++;
+      if (!now[id] && !before && after) wouldAdd++;
+    }
+    bySource[id] = { total, onlyHere, wouldAdd };
+  }
+  return { playable: items.filter((ep) => playableWith(ep, now)).length, bySource };
+}

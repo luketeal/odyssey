@@ -194,6 +194,10 @@ dialog::backdrop { background: rgb(0 0 0 / 0.45); }
 .source-prefs li { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px; border: 1px solid var(--line); border-radius: 10px; }
 .source-prefs .name { font-weight: 600; }
 .source-prefs .desc { color: var(--muted); font-size: 0.82rem; }
+.source-summary { margin: 10px 0 0; font-weight: 600; font-size: 0.9rem; }
+.source-prefs .counts { font-size: 0.82rem; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.only.lose { color: var(--danger); font-weight: 600; }
+.only.gain { color: var(--accent); font-weight: 600; }
 .source-prefs .tag { font-size: 0.72rem; font-weight: 600; color: var(--muted); margin-left: 6px; }
 .source-prefs input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); }
 .order-btns { display: flex; gap: 2px; }

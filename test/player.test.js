@@ -50,3 +50,26 @@ test('search matches number, title and album', () => {
   assert.ok(matchesQuery(ep, 'adventure begins'));
   assert.ok(!matchesQuery(ep, 'green ring'));
 });
+
+test('source impact: totals, only-here, would-add follow the current switches', async () => {
+  const { sourceImpact } = await import('../site/js/logic.js');
+  const ids = ['subsplash', 'omny', 'wayback'];
+  const eps = [
+    { sources: [{ source: 'subsplash', url: 'a', status: 'ok' }] },                                            // only Subsplash
+    { sources: [{ source: 'subsplash', url: 'b', status: 'ok' }, { source: 'omny', url: 'c', status: 'ok' }] }, // both
+    { sources: [{ source: 'wayback', url: 'd', status: 'unchecked' }] },                                      // archive only
+    { sources: [{ source: 'omny', url: 'e', status: 'broken' }, { source: 'wayback', url: 'f', status: 'ok' }] }, // podcast copy broken
+  ];
+  const prefs = { enabled: { subsplash: true, omny: true, wayback: false } };
+  let r = sourceImpact(eps, prefs, ids);
+  assert.equal(r.playable, 2);
+  assert.deepEqual(r.bySource.subsplash, { total: 2, onlyHere: 1, wouldAdd: 0 });
+  assert.deepEqual(r.bySource.omny, { total: 1, onlyHere: 0, wouldAdd: 0 }, 'broken links do not count');
+  assert.deepEqual(r.bySource.wayback, { total: 2, onlyHere: 0, wouldAdd: 2 });
+  // Turning the archive on changes what counts as "only here" elsewhere.
+  r = sourceImpact(eps, { enabled: { subsplash: false, omny: true, wayback: true } }, ids);
+  assert.deepEqual(r.bySource.omny, { total: 1, onlyHere: 1, wouldAdd: 0 });
+  assert.deepEqual(r.bySource.subsplash, { total: 2, onlyHere: 0, wouldAdd: 1 });
+  // A link that failed in this browser doesn't count either.
+  assert.equal(sourceImpact(eps, prefs, ids, { a: Date.now() }).bySource.subsplash.onlyHere, 0);
+});
