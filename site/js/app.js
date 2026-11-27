@@ -1,7 +1,7 @@
 import { store } from './store.js?v=dev';
 import {
   reconcilePrefs, candidates, pickSource, resumePoint, recordPosition,
-  fraction, formatTime, matchesQuery,
+  fraction, formatTime, matchesQuery, sourceImpact,
 } from './logic.js?v=dev';
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -638,12 +638,32 @@ dlg.addEventListener('close', () => {
 function renderSourcePrefs() {
   const ol = $('#source-prefs');
   const order = state.prefs.order;
-  const counts = {};
-  for (const ep of state.data.episodes) for (const s of ep.sources) if (s.status !== 'broken') counts[s.source] = (counts[s.source] ?? 0) + 1;
+  const broken = localBroken();
+  const eps = sourceImpact(state.data.episodes, state.prefs, order, broken);
+  const ext = sourceImpact(state.extras, state.prefs, order, broken);
+  const n = (count, one, many = `${one}s`) => `${count} ${count === 1 ? one : many}`;
+  $('#source-summary').textContent = `With these settings: ${n(eps.playable, 'episode')} and ${n(ext.playable, 'extra')} playable`;
+
   ol.replaceChildren(...order.map((id, i) => {
     const s = state.sourceInfo.get(id);
-    const cb = el('input', { type: 'checkbox', checked: state.prefs.enabled[id], 'aria-label': `Use ${s.name}`,
-      onchange: (e) => { state.prefs.enabled[id] = e.target.checked; store.setPrefs(state.prefs); } });
+    const on = state.prefs.enabled[id];
+    const e = eps.bySource[id], x = ext.bySource[id];
+    // What it has (and, when on, what only it covers).
+    const has = [n(e.total, 'episode'), on && e.total ? `${e.onlyHere} only here` : null, x.total ? n(x.total, 'extra') : null].filter(Boolean).join(' · ');
+    // What flipping the switch would change.
+    const lost = [e.onlyHere ? n(e.onlyHere, 'episode') : null, x.onlyHere ? (x.onlyHere === x.total ? `all ${n(x.onlyHere, 'extra')}` : n(x.onlyHere, 'extra')) : null].filter(Boolean);
+    const gained = [e.wouldAdd ? n(e.wouldAdd, 'episode') : null, x.wouldAdd ? n(x.wouldAdd, 'extra') : null].filter(Boolean);
+    const impact = on
+      ? (lost.length ? `Turning this off would hide ${lost.join(' and ')}.` : "Turning this off wouldn't hide anything.")
+      : (gained.length ? `Turning this on would add ${gained.join(' and ')}.` : "Turning this on wouldn't add anything new.");
+
+    const cb = el('input', { type: 'checkbox', checked: on, 'aria-label': `Use ${s.name}`,
+      onchange: (ev) => {
+        state.prefs.enabled[id] = ev.target.checked;
+        store.setPrefs(state.prefs);
+        renderSourcePrefs(); // counts depend on every switch
+        ol.querySelectorAll('li')[i]?.querySelector('input')?.focus();
+      } });
     const move = (d) => {
       const j = i + d;
       [order[i], order[j]] = [order[j], order[i]];
@@ -655,7 +675,9 @@ function renderSourcePrefs() {
       cb,
       el('div', {},
         el('div', { class: 'name' }, s.name, s.official ? null : el('span', { class: 'tag', text: 'Unofficial copy' })),
-        el('div', { class: 'desc', text: `${s.description} ${counts[id] ?? 0} links.` })),
+        el('div', { class: 'desc', text: s.description }),
+        el('div', { class: 'counts', text: has }),
+        el('div', { class: `impact${on && lost.length ? ' warn' : ''}${!on && gained.length ? ' gain' : ''}`, text: impact })),
       el('div', { class: 'order-btns' },
         el('button', { type: 'button', class: 'up', 'aria-label': `Move ${s.name} up`, disabled: i === 0, onclick: () => move(-1), text: '↑' }),
         el('button', { type: 'button', class: 'down', 'aria-label': `Move ${s.name} down`, disabled: i === order.length - 1, onclick: () => move(1), text: '↓' })));
