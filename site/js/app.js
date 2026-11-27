@@ -29,6 +29,7 @@ const state = {
   prefs: null,
   view: 'episodes',
   extras: [], // podcast extras, oldest first
+  openGroups: { episodes: new Set(), extras: new Set() }, // expanded seasons/years, this visit only
   lists: {
     episodes: { query: '', filter: 'playable', shown: PAGE },
     extras: { query: '', filter: 'playable', shown: PAGE },
@@ -66,6 +67,7 @@ async function load() {
   const d = new Date(data.generatedAt);
   $('#data-date').textContent = Number.isNaN(d.getTime()) ? '' : `Links last updated ${d.toLocaleDateString()}.`;
 
+  openLastGroups();
   renderAll();
   restoreLast();
   openFromHash();
@@ -109,7 +111,6 @@ const LISTS = {
     groupLabel: (key) => (key === 'other' ? 'Specials and album-only episodes' : `Season ${key}`),
     groupMeta: (key, items) => (key === 'other' ? '' : items[0].year),
     noun: ['episode', 'episodes'],
-    uiOpen: 'open',
     uiFilter: 'filter',
     ids: { list: '#episode-list', search: '#search', filter: '#filter', stats: '#stats' },
   },
@@ -119,7 +120,6 @@ const LISTS = {
     groupLabel: (key) => key,
     groupMeta: () => '',
     noun: ['extra', 'extras'],
-    uiOpen: 'openExtras',
     uiFilter: 'filterExtras',
     ids: { list: '#extras-list', search: '#search-extras', filter: '#filter-extras', stats: '#stats-extras' },
   },
@@ -162,7 +162,7 @@ function renderList(name) {
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(ep);
   }
-  const openSet = new Set(store.ui()[cfg.uiOpen] ?? []);
+  const openSet = state.openGroups[name]; // this visit only; not saved
   const frag = document.createDocumentFragment();
   for (const [key, group] of groups) {
     const done = group.filter((e) => progress[e.id]?.done).length;
@@ -176,9 +176,7 @@ function renderList(name) {
     };
     det.addEventListener('toggle', () => {
       if (det.open) fill();
-      const set = new Set(store.ui()[cfg.uiOpen] ?? []);
-      det.open ? set.add(key) : set.delete(key);
-      store.setUi({ [cfg.uiOpen]: [...set] });
+      det.open ? openSet.add(key) : openSet.delete(key);
     });
     if (openSet.has(key)) { det.open = true; fill(); }
     frag.append(det);
@@ -309,7 +307,11 @@ function playItem(item, { source, autoplay = true, silentFallback = false } = {}
 
   player.hidden = false;
   player.classList.add('loading');
-  $('#np-title').textContent = item.code ? `#${item.code} ${item.title}` : item.title;
+  const title = item.code ? `#${item.code} ${item.title}` : item.title;
+  setTicker($('#np-title'), title);
+  // The minimized bar has room for more, since long text scrolls: album (or date for an extra).
+  const extra = item.isExtra && item.date ? readableDates(item.date) : (item.albums ?? []).find((a) => a.startsWith('#')) ?? item.albums?.[0];
+  setTicker($('#mini-name'), extra ? `${title} · ${extra}` : title);
   renderSourceSelect();
   $('#rate').textContent = `${audio.playbackRate}×`;
   setPlayerHeight();
@@ -354,8 +356,9 @@ audio.addEventListener('loadedmetadata', () => {
   const { time, approximate } = resumePoint(prog, cur.source.url, audio.duration);
   if (time > 0 && time < audio.duration - 5) {
     audio.currentTime = time;
-    if (approximate) toast(`This copy is a different length, so it resumed at about ${formatTime(time)}.`);
-    else if (!pendingResume.silentFallback) toast(`Resuming at ${formatTime(time)}`);
+    // The time display shows where playback resumed. Only a jump to a different-length copy needs
+    // explaining, and only when playback is actually starting.
+    if (pendingResume.autoplay && approximate) toast(`This copy is a different length, so it resumed at about ${formatTime(time)}.`);
   }
   if (pendingResume.autoplay) audio.play().catch(() => {});
   pendingResume = null;
@@ -421,6 +424,7 @@ function updateTimes() {
   seek.max = Math.floor(d);
   if (!seek.matches(':active')) seek.value = Math.floor(audio.currentTime);
   $('#cur').textContent = formatTime(audio.currentTime);
+  $('#mini-time').textContent = d ? `${formatTime(audio.currentTime)} / ${formatTime(d)}` : formatTime(audio.currentTime);
   $('#dur').textContent = formatTime(d);
   if ('mediaSession' in navigator && d && navigator.mediaSession.setPositionState) {
     try { navigator.mediaSession.setPositionState({ duration: d, position: Math.min(audio.currentTime, d), playbackRate: audio.playbackRate }); } catch {}
@@ -478,10 +482,35 @@ function setupMediaSession(item) {
 }
 
 /** Show the last episode in the player (paused) so the listener sees where they stopped. */
+/**
+ * On arrival only the group holding the most recently played episode (and extra) is open;
+ * everything else starts closed. Older versions saved open groups: drop that.
+ */
+function openLastGroups() {
+  const ui = store.ui();
+  if (ui.open || ui.openExtras) store.setUi({ open: undefined, openExtras: undefined });
+  const progress = store.allProgress();
+  const latest = (items) => items.reduce((best, it) => {
+    const t = progress[it.id]?.updated ?? 0;
+    return t > (best?.t ?? 0) ? { it, t } : best;
+  }, null)?.it;
+  const ep = (ui.lastId && state.byId.get(ui.lastId) && !state.byId.get(ui.lastId).isExtra ? state.byId.get(ui.lastId) : null) ?? latest(state.data.episodes);
+  const ex = latest(state.extras);
+  if (ep) state.openGroups.episodes.add(LISTS.episodes.groupKey(ep));
+  if (ex) state.openGroups.extras.add(LISTS.extras.groupKey(ex));
+  state.scrollTo = ep?.id ?? null;
+}
+
 function restoreLast() {
   const id = store.ui().lastId;
   const item = id && state.byId.get(id);
-  if (item && !location.hash.startsWith('#ep=') && playableNow(item)) playItem(item, { autoplay: false });
+  if (item && !location.hash.startsWith('#ep=') && playableNow(item)) {
+    playItem(item, { autoplay: false });
+    setMinimized(true); // there, but out of the way
+  }
+  if (state.scrollTo && !location.hash.startsWith('#ep=') && !location.search.includes('updated=')) {
+    requestAnimationFrame(() => document.getElementById(state.scrollTo)?.scrollIntoView({ block: 'center' }));
+  }
 }
 
 function openFromHash() {
@@ -718,6 +747,74 @@ $('#clear-history').addEventListener('click', () => {
   toast('Listening history cleared.');
 });
 
+// ---------- ticker for text that doesn't fit ----------
+// Overflowing text pauses, slides left to reveal the rest, pauses, and slides back. Text that fits
+// doesn't move. With "reduce motion" on, the CSS falls back to a plain "…" cut-off.
+
+const tickerWatch = new ResizeObserver((entries) => entries.forEach((e) => measureTicker(e.target)));
+
+function setTicker(box, text) {
+  let inner = box.querySelector(':scope > .ticker-text');
+  if (!inner) {
+    box.classList.add('ticker');
+    inner = el('span', { class: 'ticker-text' });
+    box.replaceChildren(inner);
+    tickerWatch.observe(box); // re-measure on resize and when a hidden bar becomes visible
+  }
+  inner.textContent = text;
+  box.title = text;
+  measureTicker(box);
+}
+
+function measureTicker(box) {
+  const inner = box.querySelector(':scope > .ticker-text');
+  if (!inner || !box.clientWidth) return; // hidden: measured again once visible
+  const overflow = inner.scrollWidth - box.clientWidth;
+  const scrolling = overflow > 2;
+  box.classList.toggle('scrolling', scrolling);
+  if (scrolling) {
+    box.style.setProperty('--ticker-shift', `-${overflow + 8}px`);
+    box.style.setProperty('--ticker-time', `${Math.max(6, 3 + overflow / 25).toFixed(1)}s`); // ~25px a second, plus pauses
+  }
+}
+
+// ---------- minimize / close the player ----------
+
+function setMinimized(min) {
+  player.classList.toggle('minimized', min);
+  setPlayerHeight();
+}
+
+/** Stop, save the position, and hide the player. The episode stays in Continue. */
+function closePlayer() {
+  if (!state.current) return;
+  saveNow();
+  const id = state.current.item.id;
+  state.wantPlay = false;
+  clearTimeout(loadTimer);
+  audio.pause();
+  state.current = null;
+  audio.removeAttribute('src');
+  audio.load();
+  player.hidden = true;
+  setMinimized(false);
+  store.setUi({ lastId: null }); // don't bring it back on the next visit
+  if (location.hash.startsWith('#ep=')) history.replaceState(null, '', location.pathname + location.search);
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = null;
+    try { navigator.mediaSession.playbackState = 'none'; } catch {}
+  }
+  document.querySelectorAll('.ep.current').forEach((r) => r.classList.remove('current'));
+  refreshRows(id);
+}
+
+$('#min-btn').addEventListener('click', () => setMinimized(true));
+$('#expand-btn').addEventListener('click', () => setMinimized(false));
+$('#mini-title').addEventListener('click', () => setMinimized(false));
+$('#mini-play').addEventListener('click', () => toggle());
+$('#close-btn').addEventListener('click', closePlayer);
+$('#mini-close').addEventListener('click', closePlayer);
+
 // ---------- sources popup ----------
 // Every place an episode (or extra) can be played from, with a link to each audio file.
 // Suspected broken links are hidden behind a toggle inside the popup.
@@ -870,6 +967,8 @@ function reloadForUpdate() {
   u.searchParams.set('view', state.view);
   u.searchParams.set('y', String(Math.round(scrollY)));
   if (state.current) u.searchParams.set('item', state.current.item.id);
+  if (player.classList.contains('minimized')) u.searchParams.set('min', '1');
+  u.searchParams.set('open', JSON.stringify({ e: [...state.openGroups.episodes], x: [...state.openGroups.extras] }));
   location.replace(u.href);
 }
 
@@ -880,9 +979,18 @@ function restoreAfterUpdate() {
   const view = u.searchParams.get('view');
   const y = Number(u.searchParams.get('y')) || 0;
   const item = state.byId.get(u.searchParams.get('item'));
-  for (const k of ['updated', 'view', 'y', 'item']) u.searchParams.delete(k);
+  const min = u.searchParams.get('min') === '1';
+  let open = null;
+  try { open = JSON.parse(u.searchParams.get('open') ?? 'null'); } catch {}
+  for (const k of ['updated', 'view', 'y', 'item', 'min', 'open']) u.searchParams.delete(k);
   history.replaceState(null, '', u.pathname + u.search + u.hash);
+  if (open) {
+    state.openGroups.episodes = new Set(open.e ?? []);
+    state.openGroups.extras = new Set(open.x ?? []);
+    renderAll();
+  }
   if (item && state.current?.item.id !== item.id && playableNow(item)) playItem(item, { autoplay: false });
+  if (state.current) setMinimized(min);
   if (view && view !== state.view && ['episodes', 'continue', 'extras'].includes(view)) showView(view);
   requestAnimationFrame(() => scrollTo(0, y));
 }
