@@ -424,7 +424,9 @@ function updateTimes() {
   seek.max = Math.floor(d);
   if (!seek.matches(':active')) seek.value = Math.floor(audio.currentTime);
   $('#cur').textContent = formatTime(audio.currentTime);
-  $('#mini-time').textContent = d ? `${formatTime(audio.currentTime)} / ${formatTime(d)}` : formatTime(audio.currentTime);
+  // Minimized bar: a thin progress line instead of the time; screen readers get the time in the label.
+  $('#mini-fill').style.width = d ? `${Math.min(100, (audio.currentTime / d) * 100).toFixed(2)}%` : '0%';
+  $('#mini-title').setAttribute('aria-label', `Expand player. ${formatTime(audio.currentTime)}${d ? ` of ${formatTime(d)}` : ''}`);
   $('#dur').textContent = formatTime(d);
   if ('mediaSession' in navigator && d && navigator.mediaSession.setPositionState) {
     try { navigator.mediaSession.setPositionState({ duration: d, position: Math.min(audio.currentTime, d), playbackRate: audio.playbackRate }); } catch {}
