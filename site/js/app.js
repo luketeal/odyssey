@@ -648,15 +648,13 @@ function renderSourcePrefs() {
     const s = state.sourceInfo.get(id);
     const on = state.prefs.enabled[id];
     const e = eps.bySource[id], x = ext.bySource[id];
-    // What it has (and, when on, what only it covers).
-    const has = [n(e.total, 'episode'), on && e.total ? `${e.onlyHere} only here` : null, x.total ? n(x.total, 'extra') : null].filter(Boolean).join(' · ');
-    // What flipping the switch would change.
-    const lost = [e.onlyHere ? n(e.onlyHere, 'episode') : null, x.onlyHere ? (x.onlyHere === x.total ? `all ${n(x.onlyHere, 'extra')}` : n(x.onlyHere, 'extra')) : null].filter(Boolean);
-    const gained = [e.wouldAdd ? n(e.wouldAdd, 'episode') : null, x.wouldAdd ? n(x.wouldAdd, 'extra') : null].filter(Boolean);
-    const impact = on
-      ? (lost.length ? `Turning this off would hide ${lost.join(' and ')}.` : "Turning this off wouldn't hide anything.")
-      : (gained.length ? `Turning this on would add ${gained.join(' and ')}.` : "Turning this on wouldn't add anything new.");
-
+    // "Only here": what no other switched-on source has. Red when on (turning it off loses them),
+    // green when off (turning it on adds them). For a switched-off source that's what it would add.
+    const only = (counts) => (on ? counts.onlyHere : counts.wouldAdd);
+    const mark = (text) => el('span', { class: on ? 'only lose' : 'only gain', text });
+    const parts = [el('span', { text: n(e.total, 'episode') })];
+    if (e.total) parts.push(' · ', only(e) ? mark(`${only(e)} only here`) : el('span', { text: '0 only here' }));
+    if (x.total) parts.push(' · ', el('span', { text: n(x.total, 'extra') }), only(x) ? mark(` (${only(x) === x.total ? 'all' : only(x)} only here)`) : null);
     const cb = el('input', { type: 'checkbox', checked: on, 'aria-label': `Use ${s.name}`,
       onchange: (ev) => {
         state.prefs.enabled[id] = ev.target.checked;
@@ -676,8 +674,7 @@ function renderSourcePrefs() {
       el('div', {},
         el('div', { class: 'name' }, s.name, s.official ? null : el('span', { class: 'tag', text: 'Unofficial copy' })),
         el('div', { class: 'desc', text: s.description }),
-        el('div', { class: 'counts', text: has }),
-        el('div', { class: `impact${on && lost.length ? ' warn' : ''}${!on && gained.length ? ' gain' : ''}`, text: impact })),
+        el('div', { class: 'counts' }, parts.filter(Boolean))),
       el('div', { class: 'order-btns' },
         el('button', { type: 'button', class: 'up', 'aria-label': `Move ${s.name} up`, disabled: i === 0, onclick: () => move(-1), text: '↑' }),
         el('button', { type: 'button', class: 'down', 'aria-label': `Move ${s.name} down`, disabled: i === order.length - 1, onclick: () => move(1), text: '↓' })));
